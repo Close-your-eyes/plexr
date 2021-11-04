@@ -10,6 +10,13 @@
 
 Install plexr from GitHub which requires devtools:
 
+``` r
+# install.packages("devtools")
+devtools::install_github("Close-your-eyes/plexr")
+```
+
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+``` r
+library(plexr)
+```

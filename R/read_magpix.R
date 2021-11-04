@@ -1,5 +1,7 @@
 #' Read csv file from MAGPIX assay
 #'
+#' Read the csv file which is the standard output of MAGPIX.
+#'
 #' @param file_path character, path to the csv file
 #'
 #' @return list of all table parts and a processed data frame of Count, Median and Result
@@ -8,7 +10,9 @@
 #' @importFrom magrittr "%>%"
 #'
 #' @examples
-#'
+#' \dontrun{
+#' read_magpix('path_to_your_file.csv')
+#' }
 read_magpix <- function(file_path) {
 
   if (rev(strsplit(basename(file_path), "\\.")[[1]])[1] != "csv") {

@@ -1,0 +1,37 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  echo = F,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# plexr
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+## Installation
+
+Install plexr from GitHub which requires devtools:
+
+``` {r, eval=F}
+# install.packages("devtools")
+devtools::install_github("Close-your-eyes/plexr")
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r, eval=F}
+library(plexr)
+```

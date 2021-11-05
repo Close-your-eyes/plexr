@@ -78,7 +78,7 @@ report_magpix <- function(df,
 
 
   if (!missing(meta_data)) {
-    df <- dplyr::left_join(df, meta_data)
+    df <- dplyr::inner_join(df, meta_data)
     df_medians <-
       df %>%
       dplyr::filter(Count >= 30) %>%

@@ -147,7 +147,8 @@ report_magpix <- function(df,
       ggplot2::ggsave(plot = p4, filename = "p4.png", device = "png", path = out_folder, width = 16, height = 16)
     }
     ggplot2::ggsave(plot = p5, filename = "p5.png", device = "png", path = out_folder, width = 8, height = 8)
-    openxlsx::write.xlsx(cor_df_save, file.path(out_folder, "correlations.xlsx"))
+    openxlsx::write.xlsx(cor_df_save, file.path(out_folder, "correlations.xlsx"), overwrite = T)
+    openxlsx::write.xlsx(df, file.path(out_folder, "df.xlsx"), overwrite = T)
   }
 
    return(list(p1=p1,p2=p2,p3=p3,p4=p4,p5=p5,cor_df=cor_df_save))

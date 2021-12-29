@@ -4,7 +4,14 @@
 \alias{read_bioplex}
 \title{Read data from Bioplex Managers standard output xlsx}
 \usage{
-read_bioplex(file, sheets = NULL, rows = NULL)
+read_bioplex(
+  file,
+  sheets = NULL,
+  rows = NULL,
+  list_names = "analyte",
+  calc_alt_5pl_model = F,
+  ...
+)
 }
 \arguments{
 \item{file}{path to the xlsx file (export_per_analyte)}
@@ -12,8 +19,14 @@ read_bioplex(file, sheets = NULL, rows = NULL)
 \item{sheets}{names of sheets to consider; if NULL all sheets are considered}
 
 \item{rows}{rows which contain non-aggregated measured values including the header;
-e.g. 59:160 or c(59, 160); if NULL the range is guessed by occurence of "Analyte"
+e.g. 59:160 or c(59, 160); if NULL the range is guessed by occurrence of "Analyte"
 in the first column of worksheets}
+
+\item{list_names}{one of c("analyte", "region") or both; both will leave names as they occur in file}
+
+\item{calc_alt_5pl_model}{calculate an alternative 5pl regression with plexr::alt_5pl_model}
+
+\item{...}{arguments passed to plexr::alt_5pl_model}
 }
 \value{
 
@@ -23,4 +36,11 @@ Get standard values, sample values and parameters from standard curve as calcula
 This function was written based a file from Bioplex Manager version 4.
 Every sheet in the xlsx represents one analyte from the assay.
 Reading the xlsx file is done by openxlsx::read.xlsx.
+}
+\details{
+Conc column is derived from Exp Conc in case of standard and blank; and from Obs Conc in case
+of samples. OOR values are made NA; extrapolated values (with one asterisks (*)) are simply used
+as they are but asterisks are removed. Warning that NAs are created by conversion
+to numeric is normal. Columns to document previous OOR or *values are added.
+NLS model is simply created based on values from file.
 }

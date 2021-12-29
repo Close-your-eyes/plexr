@@ -10,6 +10,8 @@
 #' @return a data frame of plots and tables may also be saved to out_folder if provided
 #' @export
 #'
+#' @importFrom magrittr "%>%"
+#'
 #' @examples
 #' \dontrun{
 #' # get the path to the parent folder of a script

@@ -71,7 +71,7 @@ read_file <- function(sheet, file, rows) {
     dplyr::select(Obs.Conc, FI, `FI.-.Bkgd`, Type, Dilution, Sampling.Errors) %>%
     dplyr::mutate(OOR = ifelse(grepl("OOR", Obs.Conc), T, F)) %>%
     dplyr::mutate(expol = ifelse(grepl("\\*", Obs.Conc), T, F)) %>%
-    suppressWarnings(dplyr::mutate(FI = as.numeric(FI), Obs.Conc = as.numeric(gsub("\\*", "", Obs.Conc)))) %>%
+    dplyr::mutate(FI = as.numeric(FI), Obs.Conc = suppressWarnings(as.numeric(gsub("\\*", "", Obs.Conc)))) %>%
     dplyr::rename("Conc" = Obs.Conc) %>%
     dplyr::mutate(sheet = sheet) %>%
     dplyr::mutate(analyte = stringr::str_replace(sheet, "\\([:digit:]{1,}\\)", "")) %>%

@@ -10,16 +10,19 @@
 #' @param rows rows which contain non-aggregated measured values including the header;
 #' e.g. 59:160 or c(59, 160); if NULL the range is guessed by occurence of "Analyte"
 #' in the first column of worksheets
+#' @param list_names one of c("analyte", "region") or both
 #'
 #' @return
 #' @export
 #'
 #' @examples
-read_bioplex <- function(file, sheets = NULL, rows = NULL) {
+read_bioplex <- function(file, sheets = NULL, rows = NULL, list_names = "analyte") {
 
   if (!file.exists(file)) {
     stop("file not found, is the path correct?")
   }
+
+  list_names <- match.arg(list_names, c("analyte", "region"), several.ok = T)
 
   if (is.null(sheets)) {
     sheets <- openxlsx::getSheetNames(file)
@@ -29,7 +32,16 @@ read_bioplex <- function(file, sheets = NULL, rows = NULL) {
     }
   }
 
-  list <- sapply(sheets, read_file, file = file, rows = rows, simplify = F, USE.NAMES = T)
+  list <- sapply(sheet, read_file, file = file, rows = rows, simplify = F, USE.NAMES = T)
+
+  if (length(list_names) == 1) {
+    if (list_names == "analyte") {
+      names(list) <- stringr::str_replace(names(list), " \\([:digit:]{1,}\\)", "")
+    }
+    if (list_names == "region") {
+      names(list) <- stringr::str_extract(names(list), "([:digit:]{1,})")
+    }
+  }
 
   return(list)
 }
@@ -49,7 +61,10 @@ read_file <- function(sheet, file, rows) {
     dplyr::select(Exp.Conc, FI, `FI.-.Bkgd`, Type, Dilution, Sampling.Errors) %>%
     dplyr::mutate(Exp.Conc = ifelse(is.na(Exp.Conc), 0, Exp.Conc)) %>%
     dplyr::mutate(FI = as.numeric(FI), Exp.Conc = as.numeric(Exp.Conc)) %>%
-    dplyr::rename("Conc" = Exp.Conc)
+    dplyr::rename("Conc" = Exp.Conc) %>%
+    dplyr::mutate(sheet = sheet) %>%
+    dplyr::mutate(analyte = stringr::str_replace(sheet, " \\([:digit:]{1,}\\)", "")) %>%
+    dplyr::mutate(region = stringr::str_extract(sheet, "([:digit:]{1,})"))
 
   smp <- openxlsx::read.xlsx(xlsxFile = file, sheet = sheet, rows = min(rows):max(rows), colNames = T, skipEmptyRows = F) %>%
     dplyr::filter(grepl("X", Type)) %>%
@@ -57,9 +72,12 @@ read_file <- function(sheet, file, rows) {
     dplyr::mutate(OOR = ifelse(grepl("OOR", Obs.Conc), T, F)) %>%
     dplyr::mutate(expol = ifelse(grepl("\\*", Obs.Conc), T, F)) %>%
     dplyr::mutate(FI = as.numeric(FI), Obs.Conc = as.numeric(gsub("\\*", "", Obs.Conc))) %>%
-    dplyr::rename("Conc" = Obs.Conc)
+    dplyr::rename("Conc" = Obs.Conc) %>%
+    dplyr::mutate(sheet = sheet) %>%
+    dplyr::mutate(analyte = stringr::str_replace(sheet, "\\([:digit:]{1,}\\)", "")) %>%
+    dplyr::mutate(region = stringr::str_extract(sheet, "([:digit:]{1,})"))
 
-  std_curve_pars <- stats::setNames(as.numeric(stringr::str_extract_all(temp[which(grepl("Std. Curve", temp[,1])),1], "(-)?[:digit:]{1,}(\\.[:digit:]{1,})?")[[1]][-c(3,4)]),
+  std_curve_pars <- setNames(as.numeric(stringr::str_extract_all(temp[which(grepl("Std. Curve", temp[,1])),1], "(-)?[:digit:]{1,}(\\.[:digit:]{1,})?")[[1]][-c(3,4)]),
                              c("dd", "aa", "cc", "bb", "gg"))
 
   formula = 'FI = dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg'

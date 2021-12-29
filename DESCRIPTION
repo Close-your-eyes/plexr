@@ -23,6 +23,7 @@ Imports:
     RColorBrewer,
     readr,
     rstudioapi,
+    stats,
     stringr,
     tibble,
     tidyr

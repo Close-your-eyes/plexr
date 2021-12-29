@@ -32,7 +32,7 @@ read_bioplex <- function(file, sheets = NULL, rows = NULL, list_names = "analyte
     }
   }
 
-  list <- sapply(sheet, read_file, file = file, rows = rows, simplify = F, USE.NAMES = T)
+  list <- sapply(sheets, read_file, file = file, rows = rows, simplify = F, USE.NAMES = T)
 
   if (length(list_names) == 1) {
     if (list_names == "analyte") {

@@ -8,9 +8,9 @@
 #' @param file path to the xlsx file (export_per_analyte)
 #' @param sheets names of sheets to consider; if NULL all sheets are considered
 #' @param rows rows which contain non-aggregated measured values including the header;
-#' e.g. 59:160 or c(59, 160); if NULL the range is guessed by occurence of "Analyte"
+#' e.g. 59:160 or c(59, 160); if NULL the range is guessed by occurrence of "Analyte"
 #' in the first column of worksheets
-#' @param list_names one of c("analyte", "region") or both
+#' @param list_names one of c("analyte", "region") or both; both will leave names as they occur in file
 #'
 #' @return
 #' @export

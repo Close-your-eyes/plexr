@@ -50,7 +50,7 @@ read_bioplex <- function(file,
   list <- sapply(sheets, read_bioplex_file, file = file, rows = rows, simplify = F, USE.NAMES = T)
 
   if (calc_alt_5pl_model) {
-    list2 <- lapply(list, alt_5pl_model, model_name = "alt_nls_model", ...)
+    list <- lapply(list, alt_5pl_model, model_name = "alt_nls_model", ...)
   }
 
   if (length(list_names) == 1) {

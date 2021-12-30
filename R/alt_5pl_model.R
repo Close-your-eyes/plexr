@@ -22,6 +22,7 @@
 #' the model is added under that name to list and list is returned
 #' @param ... additional parameters passed to nls.multstart::nls_multstart; e.g.
 #' control = minpack.lm::nls.lm.control(maxiter = 1024, maxfev=10000); or supp_errors = "Y"
+#' @param exag_factor factor used to increase range of allowed range of gg, bb, cc from std_curve_pars
 #'
 #' @return plain nls_model when is.null(model_name); or appended list with nls_model named model_name
 #' @export
@@ -31,6 +32,7 @@ alt_5pl_model <- function(list,
                           n_iter = 1000,
                           weights = c("lower", "upper", "none"),
                           model_name = NULL,
+                          exag_factor = 10,
                           ...) {
 
   if (!is.numeric(weights)) {
@@ -42,18 +44,18 @@ alt_5pl_model <- function(list,
                    #gg = 0.1,
                    #bb = -2,
                    #cc = 100
-                   gg = list$std_curve_pars[["gg"]]/10,
-                   bb = list$std_curve_pars[["bb"]]*10,
-                   cc = list$std_curve_pars[["cc"]]/10
+                   gg = list$std_curve_pars[["gg"]]/exag_factor,
+                   bb = list$std_curve_pars[["bb"]]*exag_factor,
+                   cc = list$std_curve_pars[["cc"]]/exag_factor
   )
   start_upper <- c(aa = 100*max(list$standard$FI),
                    dd = min(list$standard$FI)*1.5,
                    #gg = 5,
                    #bb = -0.1,
                    #cc = 10000
-                   gg = list$std_curve_pars[["gg"]]*10,
-                   bb = list$std_curve_pars[["bb"]]/10,
-                   cc = list$std_curve_pars[["cc"]]*10
+                   gg = list$std_curve_pars[["gg"]]*exag_factor,
+                   bb = list$std_curve_pars[["bb"]]/exag_factor,
+                   cc = list$std_curve_pars[["cc"]]*exag_factor
   )
 
   list$standard <- list$standard[order(list$standard$FI),]

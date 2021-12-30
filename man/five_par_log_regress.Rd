@@ -21,7 +21,7 @@ Alternative to stats::predict. Provide concentration (Conc) or Fluorescence inte
 to have the other one returned according to the model.
 }
 \details{
-If FI is provided, dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg is used;
+If FI is provided, ((((aa - dd) / (FI - dd))^(1/gg) - 1)^(1/bb))*cc is used;
 if Conc is provided dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg is used.
 Alternatively stats::predict(nls_model, newdata = data.frame(Conc = 1:10))
 }

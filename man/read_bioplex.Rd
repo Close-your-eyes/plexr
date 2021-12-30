@@ -41,6 +41,7 @@ Reading the xlsx file is done by openxlsx::read.xlsx.
 Conc column is derived from Exp Conc in case of standard and blank; and from Obs Conc in case
 of samples. OOR values are made NA; extrapolated values (with one asterisks (*)) are simply used
 as they are but asterisks are removed. Warning that NAs are created by conversion
-to numeric is normal. Columns to document previous OOR or *values are added.
+to numeric is normal. Columns to document previous OOR or *values are added. FI - Bkgd column
+is renamed to FI_bkgd_corr.
 NLS model is simply created based on values from file.
 }

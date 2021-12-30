@@ -9,6 +9,7 @@ alt_5pl_model(
   n_iter = 1000,
   weights = c("lower", "upper", "none"),
   model_name = NULL,
+  exag_factor = 10,
   ...
 )
 }
@@ -25,6 +26,8 @@ by FI before fitting; take this into account when providing numeric weights.}
 
 \item{model_name}{if NULL, just the model is returned; if model_name is not NULL
 the model is added under that name to list and list is returned}
+
+\item{exag_factor}{factor used to increase range of allowed range of gg, bb, cc from std_curve_pars}
 
 \item{...}{additional parameters passed to nls.multstart::nls_multstart; e.g.
 control = minpack.lm::nls.lm.control(maxiter = 1024, maxfev=10000); or supp_errors = "Y"}

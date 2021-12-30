@@ -8,7 +8,8 @@
 #' Conc column is derived from Exp Conc in case of standard and blank; and from Obs Conc in case
 #' of samples. OOR values are made NA; extrapolated values (with one asterisks (*)) are simply used
 #' as they are but asterisks are removed. Warning that NAs are created by conversion
-#' to numeric is normal. Columns to document previous OOR or *values are added.
+#' to numeric is normal. Columns to document previous OOR or *values are added. FI - Bkgd column
+#' is renamed to FI_bkgd_corr.
 #' NLS model is simply created based on values from file.
 #'
 #' @param file path to the xlsx file (export_per_analyte)
@@ -77,27 +78,28 @@ read_bioplex_file <- function(sheet, file, rows) {
 
   std <- openxlsx::read.xlsx(xlsxFile = file, sheet = sheet, rows = min(rows):max(rows), colNames = T, skipEmptyRows = F) %>%
     dplyr::filter(grepl("S|B", Type)) %>%
-    dplyr::select(Exp.Conc, FI, `FI.-.Bkgd`, Type, Dilution, Sampling.Errors) %>%
+    dplyr::select(Well, Exp.Conc, FI, `FI.-.Bkgd`, Type, Dilution, Sampling.Errors) %>%
+    dplyr::rename("FI_bkgd_corr" = `FI.-.Bkgd`) %>%
     dplyr::mutate(Exp.Conc = ifelse(is.na(Exp.Conc), 0, Exp.Conc)) %>%
-    dplyr::mutate(FI = as.numeric(FI), Exp.Conc = as.numeric(Exp.Conc)) %>%
+    dplyr::mutate(FI = as.numeric(FI), Exp.Conc = as.numeric(Exp.Conc), FI_bkgd_corr = as.numeric(FI_bkgd_corr)) %>%
     dplyr::rename("Conc" = Exp.Conc) %>%
     dplyr::mutate(sheet = sheet) %>%
     dplyr::mutate(analyte = stringr::str_replace(sheet, " \\([:digit:]{1,}\\)", "")) %>%
     dplyr::mutate(region = stringr::str_extract(sheet, "([:digit:]{1,})")) %>%
-    dplyr::rename(FI_bkgd_corr = `FI.-.Bkgd`) %>%
     dplyr::arrange(FI)
 
   smp <- openxlsx::read.xlsx(xlsxFile = file, sheet = sheet, rows = min(rows):max(rows), colNames = T, skipEmptyRows = F) %>%
     dplyr::filter(grepl("X", Type)) %>%
-    dplyr::select(Obs.Conc, FI, `FI.-.Bkgd`, Type, Dilution, Sampling.Errors) %>%
+    dplyr::select(Well, Obs.Conc, FI, `FI.-.Bkgd`, Type, Dilution, Sampling.Errors) %>%
+    dplyr::rename("FI_bkgd_corr" = `FI.-.Bkgd`) %>%
     dplyr::mutate(OOR = ifelse(grepl("OOR", Obs.Conc), T, F)) %>%
     dplyr::mutate(expol = ifelse(grepl("\\*", Obs.Conc), T, F)) %>%
-    dplyr::mutate(FI = as.numeric(FI), Obs.Conc = as.numeric(gsub("\\*", "", Obs.Conc))) %>%
+    dplyr::mutate(FI = as.numeric(FI), Obs.Conc = as.numeric(gsub("\\*", "", Obs.Conc)), FI_bkgd_corr = as.numeric(FI_bkgd_corr)) %>%
     dplyr::rename("Conc" = Obs.Conc) %>%
     dplyr::mutate(sheet = sheet) %>%
-    dplyr::mutate(analyte = stringr::str_replace(sheet, "\\([:digit:]{1,}\\)", "")) %>%
-    dplyr::mutate(region = stringr::str_extract(sheet, "([:digit:]{1,})")) %>%
-    dplyr::rename(FI_bkgd_corr = `FI.-.Bkgd`)
+    dplyr::mutate(analyte = stringr::str_replace(sheet, " \\([:digit:]{1,}\\)", "")) %>%
+    dplyr::mutate(region = stringr::str_extract(sheet, "([:digit:]{1,})"))
+
 
   # this regex matches all numbers, with or without decimals and optional minus as prefix
   all_nums <- "(-)?[:digit:]{1,}(\\.[:digit:]{1,})?"

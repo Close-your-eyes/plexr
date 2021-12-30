@@ -30,13 +30,14 @@ the model is added under that name to list and list is returned}
 control = minpack.lm::nls.lm.control(maxiter = 1024, maxfev=10000); or supp_errors = "Y"}
 }
 \value{
-
+plain nls_model when is.null(model_name); or appended list with nls_model named model_name
 }
 \description{
 nls.multstart::nls_multstart is used to calculate a 5 parameter logistic regression.
 Multiparametric regression requires to guess starting values. This guessing is done
-based on standard values (aa, dd) and on a previous regression made by the bioplex
-biomanager (cc, dd, gg).
+based on standard values (for aa, dd) and on a previous regression made by the bioplex
+biomanager (for cc, dd, gg). Sometimes, results of model fitting have not been
+consistent. Try to vary n_iter or simply repeat the fitting.
 }
 \details{
 Model for fitting is FI ~ dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg.

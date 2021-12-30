@@ -2,8 +2,9 @@
 #'
 #' nls.multstart::nls_multstart is used to calculate a 5 parameter logistic regression.
 #' Multiparametric regression requires to guess starting values. This guessing is done
-#' based on standard values (aa, dd) and on a previous regression made by the bioplex
-#' biomanager (cc, dd, gg).
+#' based on standard values (for aa, dd) and on a previous regression made by the bioplex
+#' biomanager (for cc, dd, gg). Sometimes, results of model fitting have not been
+#' consistent. Try to vary n_iter or simply repeat the fitting.
 #'
 #' Model for fitting is FI ~ dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg.
 #' dd corresponds to the horizontal asymptote for x -> -Inf,
@@ -22,7 +23,7 @@
 #' @param ... additional parameters passed to nls.multstart::nls_multstart; e.g.
 #' control = minpack.lm::nls.lm.control(maxiter = 1024, maxfev=10000); or supp_errors = "Y"
 #'
-#' @return
+#' @return plain nls_model when is.null(model_name); or appended list with nls_model named model_name
 #' @export
 #'
 #' @examples
@@ -59,18 +60,17 @@ alt_5pl_model <- function(list,
 
   if (!is.numeric(weights)) {
     if (weights == "lower") {
-      weights <- rev(list$standard$FI)^2
-    }
-    if (weights == "upper") {
-      weights <- list$standard$FI^2
-    }
-    if (weights == "none") {
-      weights <- rep(1, length(list$standard$FI))
+      list$standard$w <- rev(list$standard$FI)^2
+    } else if (weights == "upper") {
+      list$standard$w <- list$standard$FI^2
+    } else if (weights == "none") {
+      list$standard$w <- rep(1, times = length(list$standard$FI))
     }
   } else {
     if (length(weights) != length(list$standard$FI)) {
       stop("weights has to have the same length as list$standard$FI.")
     }
+    list$standard$w <- weights
   }
 
   model <- nls.multstart::nls_multstart(formula = FI ~ dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg,
@@ -78,9 +78,8 @@ alt_5pl_model <- function(list,
                                         iter = n_iter,
                                         start_lower = start_lower,
                                         start_upper = start_upper,
-                                        modelweights = weights,
+                                        modelweights = w,
                                         ...)
-
 
 
   if (!is.null(model_name)) {

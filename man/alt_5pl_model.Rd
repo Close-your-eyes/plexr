@@ -8,7 +8,6 @@ alt_5pl_model(
   list,
   n_iter = 1000,
   weights = c("lower", "upper", "none"),
-  FI = NULL,
   model_name = NULL,
   ...
 )
@@ -20,15 +19,15 @@ alt_5pl_model(
 
 \item{weights}{on which end of the regression does good fitting to standards
 is required most (e.g. where do the measured values lie), lower range or upper range
-or no weights (none); only used if FI is NULL.}
-
-\item{FI}{provide custom weights instead of the easy-to-use weights parameter}
+or no weights (none); alternatively provide a numeric vector of weights -
+has to be same length as list$standard$FI; rows of list$standard will be order increasingly
+by FI before fitting; take this into account when providing numeric weights.}
 
 \item{model_name}{if NULL, just the model is returned; if model_name is not NULL
 the model is added under that name to list and list is returned}
 
 \item{...}{additional parameters passed to nls.multstart::nls_multstart; e.g.
-control = nls.lm.control(maxiter = 1024, maxfev=10000); or supp_errors = "Y"}
+control = minpack.lm::nls.lm.control(maxiter = 1024, maxfev=10000); or supp_errors = "Y"}
 }
 \value{
 
@@ -38,4 +37,10 @@ nls.multstart::nls_multstart is used to calculate a 5 parameter logistic regress
 Multiparametric regression requires to guess starting values. This guessing is done
 based on standard values (aa, dd) and on a previous regression made by the bioplex
 biomanager (cc, dd, gg).
+}
+\details{
+Model for fitting is FI ~ dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg.
+dd corresponds to the horizontal asymptote for x -> -Inf,
+aa corresponds to the horizontal asymptote for x -> Inf.
+(https://laustep.github.io/stlahblog/posts/5pl.html)
 }

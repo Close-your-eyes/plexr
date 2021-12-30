@@ -84,6 +84,7 @@ read_bioplex_file <- function(sheet, file, rows) {
     dplyr::mutate(sheet = sheet) %>%
     dplyr::mutate(analyte = stringr::str_replace(sheet, " \\([:digit:]{1,}\\)", "")) %>%
     dplyr::mutate(region = stringr::str_extract(sheet, "([:digit:]{1,})")) %>%
+    dplyr::rename(FI_bkgd_corr = `FI.-.Bkgd`) %>%
     dplyr::arrange(FI)
 
   smp <- openxlsx::read.xlsx(xlsxFile = file, sheet = sheet, rows = min(rows):max(rows), colNames = T, skipEmptyRows = F) %>%
@@ -95,7 +96,8 @@ read_bioplex_file <- function(sheet, file, rows) {
     dplyr::rename("Conc" = Obs.Conc) %>%
     dplyr::mutate(sheet = sheet) %>%
     dplyr::mutate(analyte = stringr::str_replace(sheet, "\\([:digit:]{1,}\\)", "")) %>%
-    dplyr::mutate(region = stringr::str_extract(sheet, "([:digit:]{1,})"))
+    dplyr::mutate(region = stringr::str_extract(sheet, "([:digit:]{1,})")) %>%
+    dplyr::rename(FI_bkgd_corr = `FI.-.Bkgd`)
 
   # this regex matches all numbers, with or without decimals and optional minus as prefix
   all_nums <- "(-)?[:digit:]{1,}(\\.[:digit:]{1,})?"

@@ -42,18 +42,18 @@ alt_5pl_model <- function(list,
                    #gg = 0.1,
                    #bb = -2,
                    #cc = 100
-                   gg = list$std_curve_pars[["gg"]]/100,
-                   bb = list$std_curve_pars[["bb"]]*100,
-                   cc = list$std_curve_pars[["cc"]]/100
+                   gg = list$std_curve_pars[["gg"]]/10,
+                   bb = list$std_curve_pars[["bb"]]*10,
+                   cc = list$std_curve_pars[["cc"]]/10
   )
   start_upper <- c(aa = 100*max(list$standard$FI),
                    dd = min(list$standard$FI)*1.5,
                    #gg = 5,
                    #bb = -0.1,
                    #cc = 10000
-                   gg = list$std_curve_pars[["gg"]]*100,
-                   bb = list$std_curve_pars[["bb"]]/100,
-                   cc = list$std_curve_pars[["cc"]]*100
+                   gg = list$std_curve_pars[["gg"]]*10,
+                   bb = list$std_curve_pars[["bb"]]/10,
+                   cc = list$std_curve_pars[["cc"]]*10
   )
 
   list$standard <- list$standard[order(list$standard$FI),]

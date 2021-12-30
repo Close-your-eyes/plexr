@@ -3,7 +3,7 @@
 #' Alternative to stats::predict. Provide concentration (Conc) or Fluorescence intensity (FI)
 #' to have the other one returned according to the model.
 #'
-#' If FI is provided, dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg is used;
+#' If FI is provided, ((((aa - dd) / (FI - dd))^(1/gg) - 1)^(1/bb))*cc is used;
 #' if Conc is provided dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg is used.
 #' Alternatively stats::predict(nls_model, newdata = data.frame(Conc = 1:10))
 #'
@@ -25,6 +25,12 @@ five_par_log_regress <- function(nls_model, Conc = NULL, FI = NULL) {
     stop("Please provide Conc or FI, but not both.")
   }
 
+  if (!is.null(Conc)) {
+    if (any(Conc < 0)) {
+      stop("Negative values for Conc not allowed.")
+    }
+  }
+
   model <- as.data.frame(broom::tidy(nls_model))
   dd <- model[which(model$term == "dd"),"estimate"]
   aa <- model[which(model$term == "aa"),"estimate"]
@@ -39,8 +45,19 @@ five_par_log_regress <- function(nls_model, Conc = NULL, FI = NULL) {
   if (is.null(FI)) {
     return(dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg)
   }
+
   if (is.null(Conc)) {
-    return( ((((aa - dd) / (FI + dd))^(1/gg) - 1)^(1/bb))*cc )
+    if (length(FI[which(FI < dd)]) > 0) {
+      print(paste0(length(FI[which(FI < dd)]), " values have been removed as they were smaller than dd."))
+    }
+
+    FI <- FI[which(FI >= dd)]
+    t1 <- (aa - dd) / (FI - dd)
+    t2 <- t1^(1/gg) - 1
+    if (any(t2 < 0)) {
+      stop("((aa - dd) / (FI - dd))^(1/gg) - 1 is below 0, of which the root cannot be extracted.")
+    }
+    return(t2^(1/bb)*cc)
   }
 }
 

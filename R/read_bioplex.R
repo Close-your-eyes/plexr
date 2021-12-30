@@ -78,7 +78,10 @@ read_bioplex_file <- function(sheet, file, rows) {
 
   std <- openxlsx::read.xlsx(xlsxFile = file, sheet = sheet, rows = min(rows):max(rows), colNames = T, skipEmptyRows = F) %>%
     dplyr::filter(grepl("S|B", Type)) %>%
-    dplyr::select(Well, Exp.Conc, FI, `FI.-.Bkgd`, Type, Dilution, Sampling.Errors) %>%
+    dplyr::mutate(Type = ifelse(Type == "B", "B1", Type)) %>%
+    dplyr::mutate(sample_type = ifelse(grepl("S", Type), "standard", "blank")) %>%
+    dplyr::mutate(sample_num = stringr::str_extract(Type, "[:digit:]{1,}")) %>%
+    dplyr::select(sample_type, sample_num, Well, Exp.Conc, FI, `FI.-.Bkgd`, Type, Dilution, Sampling.Errors) %>%
     dplyr::rename("FI_bkgd_corr" = `FI.-.Bkgd`) %>%
     dplyr::mutate(Exp.Conc = ifelse(is.na(Exp.Conc), 0, Exp.Conc)) %>%
     dplyr::mutate(FI = as.numeric(FI), Exp.Conc = as.numeric(Exp.Conc), FI_bkgd_corr = as.numeric(FI_bkgd_corr)) %>%
@@ -86,11 +89,16 @@ read_bioplex_file <- function(sheet, file, rows) {
     dplyr::mutate(sheet = sheet) %>%
     dplyr::mutate(analyte = stringr::str_replace(sheet, " \\([:digit:]{1,}\\)", "")) %>%
     dplyr::mutate(region = stringr::str_extract(sheet, "([:digit:]{1,})")) %>%
-    dplyr::arrange(FI)
+    dplyr::arrange(FI) %>%
+    dplyr::group_by(Type) %>%
+    dplyr::mutate(replicate = seq(1:n())) %>%
+    dplyr::ungroup()
 
   smp <- openxlsx::read.xlsx(xlsxFile = file, sheet = sheet, rows = min(rows):max(rows), colNames = T, skipEmptyRows = F) %>%
     dplyr::filter(grepl("X", Type)) %>%
-    dplyr::select(Well, Obs.Conc, FI, `FI.-.Bkgd`, Type, Dilution, Sampling.Errors) %>%
+    dplyr::mutate(sample_type = "sample") %>%
+    dplyr::mutate(sample_num = stringr::str_extract(Type, "[:digit:]{1,}")) %>%
+    dplyr::select(sample_type, sample_num, Well, Obs.Conc, FI, `FI.-.Bkgd`, Type, Dilution, Sampling.Errors) %>%
     dplyr::rename("FI_bkgd_corr" = `FI.-.Bkgd`) %>%
     dplyr::mutate(OOR = ifelse(grepl("OOR", Obs.Conc), T, F)) %>%
     dplyr::mutate(expol = ifelse(grepl("\\*", Obs.Conc), T, F)) %>%
@@ -98,7 +106,10 @@ read_bioplex_file <- function(sheet, file, rows) {
     dplyr::rename("Conc" = Obs.Conc) %>%
     dplyr::mutate(sheet = sheet) %>%
     dplyr::mutate(analyte = stringr::str_replace(sheet, " \\([:digit:]{1,}\\)", "")) %>%
-    dplyr::mutate(region = stringr::str_extract(sheet, "([:digit:]{1,})"))
+    dplyr::mutate(region = stringr::str_extract(sheet, "([:digit:]{1,})")) %>%
+    dplyr::group_by(Type) %>%
+    dplyr::mutate(replicate = seq(1:n())) %>%
+    dplyr::ungroup()
 
 
   # this regex matches all numbers, with or without decimals and optional minus as prefix

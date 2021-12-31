@@ -50,13 +50,14 @@ five_par_log_regress <- function(nls_model, Conc = NULL, FI = NULL) {
     if (length(FI[which(FI < dd)]) > 0) {
       print(paste0(length(FI[which(FI < dd)]), " values have been removed as they were smaller than dd."))
     }
-
     FI <- FI[which(FI >= dd)]
+
     t1 <- (aa - dd) / (FI - dd)
     t2 <- t1^(1/gg) - 1
     if (any(t2 < 0)) {
-      stop("((aa - dd) / (FI - dd))^(1/gg) - 1 is below 0, of which the root cannot be extracted.")
+      print(paste0(length(which(t2 < 0)), " values have been removed as ((aa - dd) / (FI - dd))^(1/gg) - 1 was found below 0."))
     }
+    t2 <- t2[which(t2 >= 0)]
     return(t2^(1/bb)*cc)
   }
 }

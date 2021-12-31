@@ -92,7 +92,7 @@ alt_5pl_model <- function(list,
   bb <- model[which(model$term == "bb"),"estimate"]
   gg <- model[which(model$term == "gg"),"estimate"]
 
-  if (dd < aa) {
+  if (dd > aa) {
     warning("dd is greater than aa which is unexpected/should not be and may cause problems later on.")
   }
   if (cc < start_lower[["cc"]] || cc > start_upper[["cc"]]) {

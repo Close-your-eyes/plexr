@@ -34,6 +34,7 @@ read_bioplex <- function(file,
                          calc_alt_5pl_model = F,
                          ...) {
 
+  options(warn = 1)
   if (!file.exists(file)) {
     stop("file not found, is the path correct?")
   }
@@ -69,6 +70,7 @@ read_bioplex <- function(file,
 
 read_bioplex_file <- function(sheet, file, rows) {
 
+  print(sheet)
   temp <- openxlsx::read.xlsx(xlsxFile = file, sheet = sheet, colNames = F, skipEmptyRows = F)
   if (is.null(rows)) {
     start <- max(which(grepl("Analyte", temp[,1])))

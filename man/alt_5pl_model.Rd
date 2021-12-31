@@ -29,8 +29,7 @@ the model is added under that name to list and list is returned}
 
 \item{exag_factor}{factor used to increase range of allowed range of gg, bb, cc from std_curve_pars}
 
-\item{...}{additional parameters passed to nls.multstart::nls_multstart; e.g.
-control = minpack.lm::nls.lm.control(maxiter = 1024, maxfev=10000); or supp_errors = "Y"}
+\item{...}{additional parameters passed to nls.multstart::nls_multstart; e.g. or supp_errors = "Y"}
 }
 \value{
 plain nls_model when is.null(model_name); or appended list with nls_model named model_name

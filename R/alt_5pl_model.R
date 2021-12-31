@@ -20,8 +20,7 @@
 #' by FI before fitting; take this into account when providing numeric weights.
 #' @param model_name if NULL, just the model is returned; if model_name is not NULL
 #' the model is added under that name to list and list is returned
-#' @param ... additional parameters passed to nls.multstart::nls_multstart; e.g.
-#' control = minpack.lm::nls.lm.control(maxiter = 1024, maxfev=10000); or supp_errors = "Y"
+#' @param ... additional parameters passed to nls.multstart::nls_multstart; e.g. or supp_errors = "Y"
 #' @param exag_factor factor used to increase range of allowed range of gg, bb, cc from std_curve_pars
 #'
 #' @return plain nls_model when is.null(model_name); or appended list with nls_model named model_name
@@ -75,19 +74,41 @@ alt_5pl_model <- function(list,
     list$standard$w <- weights
   }
 
-  model <- nls.multstart::nls_multstart(formula = FI ~ dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg,
-                                        data = list$standard,
-                                        iter = n_iter,
-                                        start_lower = start_lower,
-                                        start_upper = start_upper,
-                                        modelweights = w,
-                                        ...)
+  nls_model <- nls.multstart::nls_multstart(formula = FI ~ dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg,
+                                            data = list$standard,
+                                            iter = n_iter,
+                                            start_lower = start_lower,
+                                            start_upper = start_upper,
+                                            modelweights = w,
+                                            control = minpack.lm::nls.lm.control(maxiter = 1024, maxfev = 10000), ...)
 
+  # check dd < aa
+  # check if all par within start_lower, start_upper
+
+  model <- as.data.frame(broom::tidy(nls_model))
+  dd <- model[which(model$term == "dd"),"estimate"]
+  aa <- model[which(model$term == "aa"),"estimate"]
+  cc <- model[which(model$term == "cc"),"estimate"]
+  bb <- model[which(model$term == "bb"),"estimate"]
+  gg <- model[which(model$term == "gg"),"estimate"]
+
+  if (dd < aa) {
+    warning("dd is greater than aa which is unexpected/should not be and may cause problems later on.")
+  }
+  if (cc < start_lower[["cc"]] || cc > start_upper[["cc"]]) {
+    print("cc outside of start_lower <-> start_upper range.")
+  }
+  if (bb < start_lower[["bb"]] || bb > start_upper[["bb"]]) {
+    print("bb outside of start_lower <-> start_upper range.")
+  }
+  if (gg < start_lower[["gg"]] || gg > start_upper[["gg"]]) {
+    print("gg outside of start_lower <-> start_upper range.")
+  }
 
   if (!is.null(model_name)) {
-    list[[model_name]] <- model
+    list[[model_name]] <- nls_model
     return(list)
   } else {
-    return(model)
+    return(nls_model)
   }
 }

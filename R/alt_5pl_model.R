@@ -38,6 +38,21 @@ alt_5pl_model <- function(list,
     weights <- match.arg(weights, c("lower", "upper", "none"))
   }
 
+  # just printing to find problematic analytes easier from outside loop
+  if ("standard" %in% names(list)) {
+    if ("sheet" %in% names(list[["standard"]])) {
+      print(unique(list[["standard"]][["sheet"]]))
+    } else if ("analyte" %in% names(list[["standard"]])) {
+      print(unique(list[["standard"]][["analyte"]]))
+    }
+  } else if("samples" %in% names(list)) {
+    if ("sheet" %in% names(list[["samples"]])) {
+      print(unique(list[["samples"]][["sheet"]]))
+    } else if ("analyte" %in% names(list[["samples"]])) {
+      print(unique(list[["samples"]][["analyte"]]))
+    }
+  }
+
   start_lower <- c(aa = max(list$standard$FI),
                    dd = min(list$standard$FI)/1.5,
                    #gg = 0.1,
@@ -81,9 +96,6 @@ alt_5pl_model <- function(list,
                                             start_upper = start_upper,
                                             modelweights = w,
                                             control = minpack.lm::nls.lm.control(maxiter = 1024, maxfev = 10000), ...)
-
-  # check dd < aa
-  # check if all par within start_lower, start_upper
 
   model <- as.data.frame(broom::tidy(nls_model))
   dd <- model[which(model$term == "dd"),"estimate"]

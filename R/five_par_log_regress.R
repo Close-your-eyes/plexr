@@ -48,16 +48,13 @@ five_par_log_regress <- function(nls_model, Conc = NULL, FI = NULL) {
 
   if (is.null(Conc)) {
     if (length(FI[which(FI < dd)]) > 0) {
-      print(paste0(length(FI[which(FI < dd)]), " values have been removed as they were smaller than dd."))
+      print(paste0(length(FI[which(FI < dd)]), " values become NaN (not a number) as they are smaller than dd (", dd, ")."))
     }
-    FI <- FI[which(FI >= dd)]
-
     t1 <- (aa - dd) / (FI - dd)
     t2 <- t1^(1/gg) - 1
     if (any(t2 < 0)) {
-      print(paste0(length(which(t2 < 0)), " values have been removed as ((aa - dd) / (FI - dd))^(1/gg) - 1 was found below 0."))
+      print(paste0(length(which(t2 < 0)), " values become NaN (not a number) as ((aa - dd) / (FI - dd))^(1/gg) - 1 < 0."))
     }
-    t2 <- t2[which(t2 >= 0)]
     return(t2^(1/bb)*cc)
   }
 }

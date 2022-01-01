@@ -21,9 +21,6 @@
 #' @param model_name if NULL, just the model is returned; if model_name is not NULL
 #' the model is added under that name to list and list is returned
 #' @param ... additional parameters passed to nls.multstart::nls_multstart; e.g. or supp_errors = "Y"
-#' @param upper_limit_dd limit dd to the x-th smallest value of y (FI); dd is the lower limit of
-#' values that can be  supplied to the inverse function of the model; so a low dd allows to supply lower
-#' x (Conc) values to convert to FI
 #' @param exag_factor factor used to increase range of allowed range of gg, bb, cc from std_curve_pars
 #'
 #' @return plain nls_model when is.null(model_name); or appended list with nls_model named model_name
@@ -35,8 +32,8 @@ alt_5pl_model <- function(list,
                           weights = c("lower", "upper", "none"),
                           model_name = NULL,
                           exag_factor = 10,
-                          upper_limit_dd = NULL,
                           ...) {
+  #upper_limit_dd = NULL,
 
   if (!is.numeric(weights)) {
     weights <- match.arg(weights, c("lower", "upper", "none"))
@@ -93,20 +90,22 @@ alt_5pl_model <- function(list,
     list$standard$w <- weights
   }
 
-  upper <- stats::setNames(c(rep(Inf, length(start_upper))), nm = names(start_upper))
+  'upper <- stats::setNames(c(rep(10e8, length(start_upper))), nm = names(start_upper))
   if (!is.null(upper_limit_dd)) {
     if (!is.numeric(upper_limit_dd) || length(upper_limit_dd) > 1) {
       stop("upper_limit_dd has to be a numeric (integer) of length 1.")
     }
     upper[["dd"]] <- sort(list$standard$FI)[upper_limit_dd]
   }
-
+  lower <- stats::setNames(c(rep(-Inf, length(start_upper))), nm = names(start_upper))
+  lower[["aa"]] <- max(list$standard$FI)
+'
+  # supplying upper and/or lower changes the resulting model and the parameters may violate upper/lower
   nls_model <- nls.multstart::nls_multstart(formula = FI ~ dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg,
                                             data = list$standard,
                                             iter = n_iter,
                                             start_lower = start_lower,
                                             start_upper = start_upper,
-                                            upper = upper,
                                             modelweights = w,
                                             control = minpack.lm::nls.lm.control(maxiter = 1024, maxfev = 10000), ...)
 

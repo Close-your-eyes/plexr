@@ -2,7 +2,7 @@
 % Please edit documentation in R/alt_5pl_model.R
 \name{alt_5pl_model}
 \alias{alt_5pl_model}
-\title{Calculate a 5 parameter logistic regression model with some start values from another model}
+\title{Calculate a guided 5 parameter logistic regression model with some start values from another model}
 \usage{
 alt_5pl_model(
   list,

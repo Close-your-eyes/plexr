@@ -52,8 +52,8 @@ five_par_log_regress <- function(nls_model, Conc = NULL, FI = NULL) {
     }
     t1 <- (aa - dd) / (FI - dd)
     t2 <- t1^(1/gg) - 1
-    if (any(t2 < 0)) {
-      print(paste0(length(which(t2 < 0)), " values become NaN (not a number) as ((aa - dd) / (FI - dd))^(1/gg) - 1 < 0."))
+    if (any(t2[which(!is.na(t2))] < 0)) {
+      print(paste0(length(which(t2[which(!is.na(t2))] < 0)), " values become NaN (not a number) as ((aa - dd) / (FI - dd))^(1/gg) - 1 < 0."))
     }
     return(t2^(1/bb)*cc)
   }

@@ -21,9 +21,10 @@
 #' @param model_name if NULL, just the model is returned; if model_name is not NULL
 #' the model is added under that name to list and list is returned
 #' @param ... additional parameters passed to nls.multstart::nls_multstart; e.g. or supp_errors = "Y"
-#' @param exag_factor factor used to increase range of allowed range of gg, bb, cc from std_curve_pars
+#' @param exag_factor exaggeration factor used to increase range of allowed range of gg, bb, cc from std_curve_pars
+#' @param start_pars name of list entry that contains start_parameters for nls; ignored if not found or if NULL
 #'
-#' @return plain nls_model when is.null(model_name); or appended list with nls_model named model_name
+#' @return plain nls_model when is.null(model_name); or appended list with nls_model named model_name and start_pars
 #' @export
 #'
 #' @examples
@@ -32,8 +33,11 @@ alt_5pl_model <- function(list,
                           weights = c("lower", "upper", "none"),
                           model_name = NULL,
                           exag_factor = 10,
+                          start_pars = "std_curve_pars",
                           ...) {
   #upper_limit_dd = NULL,
+
+  dots <- list(...)
 
   if (!is.numeric(weights)) {
     weights <- match.arg(weights, c("lower", "upper", "none"))
@@ -54,24 +58,39 @@ alt_5pl_model <- function(list,
     }
   }
 
-  start_lower <- c(aa = max(list$standard$FI),
-                   dd = min(list$standard$FI)/1.5,
-                   #gg = 0.1,
-                   #bb = -2,
-                   #cc = 100
-                   gg = list$std_curve_pars[["gg"]]/exag_factor,
-                   bb = list$std_curve_pars[["bb"]]*exag_factor,
-                   cc = list$std_curve_pars[["cc"]]/exag_factor
-  )
-  start_upper <- c(aa = 100*max(list$standard$FI),
-                   dd = min(list$standard$FI)*1.5,
-                   #gg = 5,
-                   #bb = -0.1,
-                   #cc = 10000
-                   gg = list$std_curve_pars[["gg"]]*exag_factor,
-                   bb = list$std_curve_pars[["bb"]]/exag_factor,
-                   cc = list$std_curve_pars[["cc"]]*exag_factor
-  )
+  if (!is.null(start_pars) && start_pars %in% names(list)) {
+    if (any(!c("aa", "bb", "cc", "dd", "gg") %in% names(list[[start_pars]]))) {
+      stop(paste0(paste(which(!c("aa", "bb", "cc", "dd", "gg") %in% names(list[[start_pars]])), collapse = ", "), " not found in start_pars.
+                  Pleas provide aa, bb, cc, dd, gg."))
+    }
+  }
+
+  if (!"start_lower" %in% dots) {
+    start_lower <- c(aa = max(list$standard$FI),
+                     dd = min(list$standard$FI)/1.5,
+                     gg = ifelse(start_pars %in% names(list), list[[start_pars]][["gg"]]/exag_factor, 0.01),
+                     bb = ifelse(start_pars %in% names(list), list[[start_pars]][["bb"]]*exag_factor, -4),
+                     cc = ifelse(start_pars %in% names(list), list[[start_pars]][["cc"]]/exag_factor, 500))
+  } else {
+    start_lower <- dots[["start_lower"]]
+    if (any(!c("aa", "bb", "cc", "dd", "gg") %in% names(start_lower))) {
+      stop(paste0(paste(which(!c("aa", "bb", "cc", "dd", "gg") %in% names(start_lower)), collapse = ", "), " not found in start_lower.
+                  Pleas provide aa, bb, cc, dd, gg."))
+    }
+  }
+  if (!"start_upper" %in% dots) {
+    start_upper <- c(aa = 100*max(list$standard$FI),
+                     dd = min(list$standard$FI)*1.5,
+                     gg = ifelse(start_pars %in% names(list), list[[start_pars]][["gg"]]*exag_factor, 10),
+                     bb = ifelse(start_pars %in% names(list), list[[start_pars]][["bb"]]/exag_factor, -0.025),
+                     cc = ifelse(start_pars %in% names(list), list[[start_pars]][["cc"]]*exag_factor, 50000))
+  } else {
+    start_upper <- dots[["start_upper"]]
+    if (any(!c("aa", "bb", "cc", "dd", "gg") %in% names(start_upper))) {
+      stop(paste0(paste(which(!c("aa", "bb", "cc", "dd", "gg") %in% names(start_upper)), collapse = ", "), " not found in start_upper.
+                  Pleas provide aa, bb, cc, dd, gg."))
+    }
+  }
 
   list$standard <- list$standard[order(list$standard$FI),]
 
@@ -131,6 +150,7 @@ alt_5pl_model <- function(list,
 
   if (!is.null(model_name)) {
     list[[model_name]] <- nls_model
+    list[[paste0(model_name, "_start_pars")]] <- list("start_lower" = start_lower, "start_upper" = start_upper)
     return(list)
   } else {
     return(nls_model)

@@ -65,6 +65,8 @@ alt_5pl_model <- function(list,
     }
   }
 
+  # understand what parameters mean to make good guesses
+  # https://stats.stackexchange.com/questions/160552/why-is-nls-giving-me-singular-gradient-matrix-at-initial-parameter-estimates
   if (!"start_lower" %in% dots) {
     start_lower <- c(aa = max(list$standard$FI),
                      dd = min(list$standard$FI)/1.5,
@@ -120,6 +122,7 @@ alt_5pl_model <- function(list,
   lower[["aa"]] <- max(list$standard$FI)
 '
   # supplying upper and/or lower changes the resulting model and the parameters may violate upper/lower
+  # try to linearize by log(x^n) = n*log(x) (gg and bb)
   nls_model <- nls.multstart::nls_multstart(formula = FI ~ dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg,
                                             data = list$standard,
                                             iter = n_iter,

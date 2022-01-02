@@ -30,12 +30,12 @@ the model is added under that name to list and list is returned}
 
 \item{exag_factor}{exaggeration factor used to increase range of allowed range of gg, bb, cc from std_curve_pars}
 
-\item{start_pars}{name of list entry that contains start_parameters for nls; if not found or}
+\item{start_pars}{name of list entry that contains start_parameters for nls; ignored if not found or if NULL}
 
 \item{...}{additional parameters passed to nls.multstart::nls_multstart; e.g. or supp_errors = "Y"}
 }
 \value{
-plain nls_model when is.null(model_name); or appended list with nls_model named model_name
+plain nls_model when is.null(model_name); or appended list with nls_model named model_name and start_pars
 }
 \description{
 nls.multstart::nls_multstart is used to calculate a 5 parameter logistic regression.

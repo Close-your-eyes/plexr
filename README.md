@@ -20,3 +20,8 @@ devtools::install_github("Close-your-eyes/plexr")
 ``` r
 library(plexr)
 ```
+
+## Vignettes
+
+[5-parameter-logistic regression parameter
+scan](https://close-your-eyes.github.io/plexr/articles/five_parameter_logistic_regression_parameter_scans.html)

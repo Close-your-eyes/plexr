@@ -3,9 +3,6 @@
 
 # plexr
 
-<!-- badges: start -->
-<!-- badges: end -->
-
 ## Installation
 
 Install plexr from GitHub which requires devtools:

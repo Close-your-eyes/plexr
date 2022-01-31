@@ -30,3 +30,7 @@ Imports:
     stringr,
     tibble,
     tidyr
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr

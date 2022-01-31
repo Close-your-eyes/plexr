@@ -6,17 +6,27 @@ pl5 <- function(aa,bb,cc,dd,gg, Conc) {
 
 
 
-#Std. Curve: FI = 1.44876 + (70504.1 - 1.44876) / ((1 + (Conc / 403.298)^-0.433406))^2.50569
-
+#Std. Curve: FI = dd + (aa - dd) / ((1 + (Conc / cc)^-bb))^gg
 
 dd <- 1
 aa <- 1e5
 cc <- 500
 bb <- -1
 gg <- 1
-conc <- c(seq(0,0.01,0.0001), seq(0.01,0.1,0.001), seq(0.1,1,0.01),seq(1,10,0.1), seq(10,100,1),seq(100,1000,1),seq(1000,10000,10),seq(10000,1e5,100))
+conc <- c(seq(0,     0.01,  0.0001),
+          seq(0.01,  0.1,   0.001),
+          seq(0.1,   1,     0.01),
+          seq(1,     10,    0.1),
+          seq(10,    100,   1),
+          seq(100,   1000,  10),
+          seq(1000,  10000, 100),
+          seq(10000, 1e5,   1000))
 
-
+gg_std <-
+  ggplot() +
+  scale_y_log10(label = fcexpr::sci10, breaks = c(1,10,1e3,1e5)) +
+  scale_x_log10(label = fcexpr::sci10, breaks = c(0.001,0.01,0.1,1,10,1e3,1e5)) +
+  theme_bw()
 
 ## vary dd
 out <- do.call(rbind,lapply(c(1:10), function(dd) {
@@ -29,6 +39,9 @@ dd_plot <- ggplot(out, aes(x = conc, y = FI, color = dd)) +
   scale_x_log10(label = fcexpr::sci10, breaks = c(0.001,0.01,0.1,1,10,1e3,1e5)) +
   theme_bw() +
   labs(title = paste0("aa=",aa, ", bb=", bb, ", cc=", cc, ", gg=",gg))
+
+p_arg +
+  geom_line(data = out, aes(x = conc, y = FI, color = dd))
 
 
 ## vary aa
@@ -59,7 +72,7 @@ bb_plot <- ggplot(out, aes(x = conc, y = FI, color = bb)) +
 bb_plot
 
 ## vary cc
-out <- do.call(rbind,lapply(c(10,50,100,200,500,1000,1e4), function(cc) {
+out <- do.call(rbind,lapply(, function(cc) {
   data.frame(FI = sapply(conc, function(x) pl5(aa,bb,cc,dd,gg,x)), aa=aa, bb=bb, cc=cc, dd=dd, gg=gg, conc=conc)
 })) %>%
   dplyr::mutate(cc = as.factor(cc))

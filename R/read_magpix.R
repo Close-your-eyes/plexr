@@ -55,7 +55,38 @@ read_magpix <- function(file_path) {
     print("df could not be further processed")
   })
 
-  return(list(table_parts = files, df = df))
+
+  std_curve_pars <- lapply(2:ncol(files[["Analysis Coefficients"]]), function(x) {
+    stats::setNames(files[["Analysis Coefficients"]][c(1,2,3,4,5),x], c("dd", "aa", "cc", "bb", "gg"))
+  })
+  names(std_curve_pars) <- names(files[["Analysis Coefficients"]])[2:ncol(files[["Analysis Coefficients"]])]
+
+  #dd <- 1 ## A/F
+  #aa <- 2e5 ## B
+  #cc <- 500 ## C
+  #bb <- -1 ## D
+  #ee <- 1 ## A/F
+  #FI = dd + (aa - dd) / ((1 + (Conc / cc)^bb))^ee
+
+  nls_model <- lapply(names(std_curve_pars), function(x) {
+    std <- as.data.frame(df[intersect(which(df$analyte == x), which(df$sample_type == "Standard")),which(names(df) %in% c("Median", "Result"))])
+    std$Result <- as.numeric(std$Result)
+    std <- std[which(!is.na(std$Median)),]
+    std <- std[which(!is.na(std$Result)),]
+    names(std) <- c("FI", "Conc")
+    nls.multstart::nls_multstart(formula = FI ~ dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg,
+                                 data = std,
+                                 iter = 1,
+                                 start_lower = std_curve_pars[[x]],
+                                 start_upper = std_curve_pars[[x]],
+                                 lower = std_curve_pars[[x]],
+                                 upper = std_curve_pars[[x]])
+  })
+  names(nls_model) <- names(std_curve_pars)
+  formula = 'FI = dd + (aa - dd) / ((1 + (Conc / cc)^bb))^gg'
+
+
+  return(list(table_parts = files, df = df, std_curve_pars = std_curve_pars, nls_model = nls_model, std_curve_formula = formula))
 
 }
 

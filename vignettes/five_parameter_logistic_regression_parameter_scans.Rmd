@@ -14,9 +14,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup, message=F}
-library(plexr)
-library(tidyverse)
+```{r, include = FALSE}
+library(ggplot2)
 ```
 
 ## Formula:
@@ -33,7 +32,8 @@ https://laustep.github.io/stlahblog/posts/5pl.html
 
 # formula as function:
 pl5 <- function (aa,bb,cc,dd,ee, Conc) {
-  # provide concentration (Conc) and parameter (aa,bb,cc,dd,ee); return fluorescence intensity (FI)
+  # provide concentration (Conc) and parameter (aa,bb,cc,dd,ee)
+  # return fluorescence intensity (FI)
   FI = dd + (aa - dd) / ((1 + (Conc / cc)^bb))^ee
   return(FI)
 }
@@ -63,7 +63,7 @@ gg_std <-
   theme_bw()
 
 ```
-1e0
+
 ## Single parameter scans
 ### dd
 ```{r dd, fig.width=8,fig.height=5}
@@ -76,8 +76,8 @@ scan <- do.call(rbind, lapply(scan_range, function(dd) {
              dd=dd,
              ee=ee,
              Conc=Conc)
-})) %>%
-  dplyr::mutate(dd = as.factor(dd))
+}))
+scan$dd <- as.factor(scan$dd)
 
 gg_std +
   geom_line(data = scan, aes(x = Conc, y = FI, color = dd)) +
@@ -95,8 +95,8 @@ scan <- do.call(rbind, lapply(scan_range, function(aa) {
              dd=dd,
              ee=ee,
              Conc=Conc)
-})) %>%
-  dplyr::mutate(aa = as.factor(aa))
+}))
+scan$aa <- as.factor(scan$aa)
 
 gg_std +
   geom_line(data = scan, aes(x = Conc, y = FI, color = aa)) +
@@ -114,8 +114,8 @@ scan <- do.call(rbind, lapply(scan_range, function(bb) {
              dd=dd,
              ee=ee,
              Conc=Conc)
-})) %>%
-  dplyr::mutate(bb = as.factor(bb))
+}))
+scan$bb <- as.factor(scan$bb)
 
 gg_std +
   geom_line(data = scan, aes(x = Conc, y = FI, color = bb)) +
@@ -133,8 +133,8 @@ scan <- do.call(rbind, lapply(scan_range, function(cc) {
              dd=dd,
              ee=ee,
              Conc=Conc)
-})) %>%
-  dplyr::mutate(cc = as.factor(cc))
+}))
+scan$cc <- as.factor(scan$c)
 
 gg_std +
   geom_line(data = scan, aes(x = Conc, y = FI, color = cc)) +
@@ -152,8 +152,8 @@ scan <- do.call(rbind, lapply(scan_range, function(ee) {
              dd=dd,
              ee=ee,
              Conc=Conc)
-})) %>%
-  dplyr::mutate(ee = as.factor(ee))
+}))
+scan$ee <- as.factor(scan$ee)
 
 gg_std +
   geom_line(data = scan, aes(x = Conc, y = FI, color = ee)) +
@@ -161,23 +161,23 @@ gg_std +
 ```
 
 ### bb, cc and ee in parallel
-```{r bb_cc_ee, fig.width=12,fig.height=10}
+```{r bb_cc_ee, fig.width=8,fig.height=5}
 scan <- do.call(rbind,lapply(c(100,1000,1e4), function(cc) {
   do.call(rbind,lapply(c(1,3,5), function(ee) {
     do.call(rbind,lapply(c(-5,-3,-2,-1), function(bb) {
-        data.frame(FI = sapply(Conc, function(x) pl5(aa=aa,bb=bb,cc=cc,dd=dd,ee=ee,Conc=x)),
-             aa=aa,
-             bb=bb,
-             cc=cc,
-             dd=dd,
-             ee=ee,
-             Conc=Conc)
+      data.frame(FI = sapply(Conc, function(x) pl5(aa=aa,bb=bb,cc=cc,dd=dd,ee=ee,Conc=x)),
+                 aa=aa,
+                 bb=bb,
+                 cc=cc,
+                 dd=dd,
+                 ee=ee,
+                 Conc=Conc)
     }))
   }))
-})) %>%
-  dplyr::mutate(bb = as.factor(bb)) %>%
-  dplyr::mutate(ee = as.factor(ee)) %>%
-  dplyr::mutate(cc = as.factor(cc))
+}))
+scan$bb <- as.factor(scan$bb)
+scan$cc <- as.factor(scan$cc)
+scan$ee <- as.factor(scan$ee)
 
 gg_std +
   geom_line(data = scan, aes(x = Conc, y = FI, color = bb)) +

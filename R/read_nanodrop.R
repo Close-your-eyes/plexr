@@ -19,7 +19,9 @@ read_nanodrop <- function(reports, spectra) {
 
   repo <- do.call(rbind,lapply(reports, function(x) {
     re <- utils::read.csv(x, sep = "\t", header = T, row.names = 1, check.names = F)
-    re$Unit <- gsub("\xb5", "u", re$Unit)
+    re$Unit <- stringr::str_replace(re$Unit, "\xb5", "u")
+    #re$Unit <- gsub("\\\\", "", re$Unit)
+    #re$Unit <- gsub("xb5", "u", re$Unit)
     names(re)[which(names(re) == "260/280")] <- "R260_280"
     names(re)[which(names(re) == "260/230")] <- "R260_230"
     names(re)[which(names(re) == "Nucleic Acid Conc.")] <- "Conc"

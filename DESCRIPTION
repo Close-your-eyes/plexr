@@ -1,5 +1,5 @@
 Package: plexr
-Title: Read Data From Standard Output Of Multiplex Immunoassay Softwares
+Title: Read Data From Standard Output Files Of Selected Softwares in Life Sciences
 Version: 0.0.0.9020
 Authors@R: 
     person(given = "Christopher Mark",
@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "vonskopnik@pm.me",
            comment = c(ORCID = "0000-0002-6089-4769"))
-Description: Read and quickly evaluate data from multiplex immunoassays. Create standard reports and eventually re-calculate 5-point logistic regressions.
+Description: Read and quickly evaluate data from multiplex immunoassays or Nanodrop. Create standard reports and work with re-calculated 5-point logistic regressions.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

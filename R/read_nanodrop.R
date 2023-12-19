@@ -22,13 +22,14 @@ read_nanodrop <- function(reports, spectra) {
     re$Unit <- gsub("\xb5", "u", re$Unit)
     names(re)[which(names(re) == "260/280")] <- "R260_280"
     names(re)[which(names(re) == "260/230")] <- "R260_230"
-    names(re)[which(names(re) == "Nucleic Acid Conc.")] <- "Conc"
+    names(re)[which(grepl("Nucleic Acid", names(re)))] <- "Conc" # new version
     names(re) <- gsub(" ", "_", names(re))
     re[,"Date"] <- sapply(strsplit(re[,"Date_and_Time"], " "), "[", 1)
     re[,"Time"] <- sapply(strsplit(re[,"Date_and_Time"], " "), "[", 2)
     re <- re[,-which(names(re) == "Date_and_Time")]
 
-    to_num <- c("Conc", "A260", "A280", "R260_280", "R260_230", "Factor")
+    to_num <- c("Conc", "A260", "A280", "R260_280", "R260_230", "Factor", "A260_(Abs)", "A280_(Abs)")
+    to_num <- to_num[which(to_num %in% names(re))]
     re[to_num] <- sapply(re[to_num], function(y) {
       as.numeric(gsub(",",".",y))
     })

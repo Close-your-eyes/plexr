@@ -56,6 +56,7 @@ read_nanodrop <- function(reports, spectra) {
       wl[,"Sample_ID"] <- as.character(sp[(lines[z]-2),1])
       return(wl)
     }))
+    names(wl_df)[which(grepl("Absorbance", names(wl_df)))] <- "Absorbance" # new version
     return(wl_df)
   }))
 

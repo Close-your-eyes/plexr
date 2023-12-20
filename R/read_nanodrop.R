@@ -25,9 +25,11 @@ read_nanodrop <- function(reports, spectra) {
     names(re)[which(names(re) == "260/280")] <- "R260_280"
     names(re)[which(names(re) == "260/230")] <- "R260_230"
     names(re)[which(grepl("Nucleic Acid", names(re)))] <- "Conc" # new version
+    names(re)[which(grepl("^A260", names(re)))] <- "A260" # new version
+    names(re)[which(grepl("^A280", names(re)))] <- "A280" # new version
     names(re) <- gsub(" ", "_", names(re))
-    re[,"Date"] <- sapply(strsplit(re[,"Date_and_Time"], " "), "[", 1)
-    re[,"Time"] <- sapply(strsplit(re[,"Date_and_Time"], " "), "[", 2)
+    re[,"date"] <- sapply(strsplit(re[,"Date_and_Time"], " "), "[", 1)
+    re[,"time"] <- sapply(strsplit(re[,"Date_and_Time"], " "), "[", 2)
     re <- re[,-which(names(re) == "Date_and_Time")]
 
     to_num <- c("Conc", "A260", "A280", "R260_280", "R260_230", "Factor", "A260_(Abs)", "A280_(Abs)")
@@ -35,8 +37,14 @@ read_nanodrop <- function(reports, spectra) {
     re[to_num] <- sapply(re[to_num], function(y) {
       as.numeric(gsub(",",".",y))
     })
+    names(re)[which(names(re) == "Sample_ID")] <- "sample_ID"
+    names(re)[which(names(re) == "User_name")] <- "user"
+    names(re)[which(names(re) == "Conc")] <- "conc"
+    names(re)[which(names(re) == "Unit")] <- "unit"
+    names(re)[which(names(re) == "Sample_Type")] <- "sample_type"
+    names(re)[which(names(re) == "Factor")] <- "factor"
     re[,"sheet"] <- basename(x)
-    re[,"Sample_ID"] <- as.character(re[,"Sample_ID"])
+    re[,"sample_ID"] <- as.character(re[,"sample_ID"])
     return(re)
   }))
 
@@ -51,12 +59,13 @@ read_nanodrop <- function(reports, spectra) {
       wl[names(wl)] <- sapply(wl[names(wl)], function(y) {
         as.numeric(gsub(",",".",y))
       })
-      wl[,"Date"] <- strsplit(sp[(lines[z]-1),1], " ")[[1]][1]
-      wl[,"Time"] <- strsplit(sp[(lines[z]-1),1], " ")[[1]][2]
-      wl[,"Sample_ID"] <- as.character(sp[(lines[z]-2),1])
+      wl[,"date"] <- strsplit(sp[(lines[z]-1),1], " ")[[1]][1]
+      wl[,"time"] <- strsplit(sp[(lines[z]-1),1], " ")[[1]][2]
+      wl[,"sample_ID"] <- as.character(sp[(lines[z]-2),1])
       return(wl)
     }))
-    names(wl_df)[which(grepl("Absorbance", names(wl_df)))] <- "Absorbance" # new version
+    names(wl_df)[which(grepl("Absorbance", names(wl_df)))] <- "absorbance" # new version
+    names(wl_df)[which(grepl("Wavelength", names(wl_df)))] <- "wavelength_nm" # new version
     return(wl_df)
   }))
 

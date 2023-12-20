@@ -23,8 +23,6 @@ read_fragmentanalyzer <- function(files,
                                   filter_names = c("Ladder", "Samp.[[:digit:]]{1,2}"),
                                   return = c("data.frame", "list")) {
 
-  files <- list.files("/Volumes/CMS_SSD_2TB/2023_UriSeq/FragmentAnalyzer", recursive = T, full.names = T, pattern = "\\.csv")
-
   return <- match.arg(return, c("data.frame", "list"))
 
   if (length(Electropherogram_file_pattern) > 1) {
@@ -144,12 +142,12 @@ read_qualities <- function(subfiles,
   if (length(unit) == 0) {
     unit <- "unit not recognized"
   }
-  names(qualities) <- c("file", "well", "sample_ID", "conc", "RQN", "ratio_28S_18S")
+  names(qualities) <- c("file", "well", "sample_ID", "conc", "RQN", "R28S_18S")
   if (!is.null(filter_names) && length(filter_names) > 1) {
     qualities <- qualities[!apply(sapply(filter_names, grepl, x = qualities[,"sample_ID",drop=T], simplify = T), 1, any),]
   }
   qualities$unit <- unit
-  qualities <- qualities[,c("well", "sample_ID", "conc", "unit", "RQN", "ratio_28S_18S", "file")]
+  qualities <- qualities[,c("well", "sample_ID", "conc", "unit", "RQN", "R28S_18S", "file")]
   return(qualities)
 }
 

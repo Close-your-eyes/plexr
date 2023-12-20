@@ -28,9 +28,6 @@ in the first column of worksheets}
 
 \item{...}{arguments passed to plexr::alt_5pl_model}
 }
-\value{
-
-}
 \description{
 Get standard values, sample values and parameters from standard curve as calculated by Bioplex Manager.
 This function was written based a file from Bioplex Manager version 4.

@@ -13,9 +13,6 @@ five_par_log_regress(nls_model, Conc = NULL, FI = NULL)
 
 \item{FI}{fluorescence intensities}
 }
-\value{
-
-}
 \description{
 Alternative to stats::predict. Provide concentration (Conc) or Fluorescence intensity (FI)
 to have the other one returned according to the model.

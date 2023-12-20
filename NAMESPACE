@@ -3,6 +3,7 @@
 export(alt_5pl_model)
 export(five_par_log_regress)
 export(read_bioplex)
+export(read_fragmentanalyzer)
 export(read_magpix)
 export(read_nanodrop)
 export(report_magpix)

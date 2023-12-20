@@ -103,10 +103,10 @@ read_fragmentanalyzer <- function(files,
 
 
   if (return == "data.frame") {
-    return(list(electropherogram = pherograms,
-                quality = qualities,
-                peaks = peak_list[["peaks"]],
-                peaks_summary = peak_list[["summary"]]))
+    return(list(electropherogram = tibble::as_tibble(pherograms),
+                quality = tibble::as_tibble(qualities),
+                peaks = tibble::as_tibble(peak_list[["peaks"]]),
+                peaks_summary = tibble::as_tibble(peak_list[["summary"]])))
   } else if (return == "list") {
     return(list(electropherogram = split(pherograms,pherograms$file),
                 quality = split(qualities,qualities$file),

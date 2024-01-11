@@ -269,6 +269,7 @@ read_csv_while_replacing_sep_in_header <- function(filepath, sep = ",", check.na
     if (check.names) {
       names(df) <- make.names(names(df))
     }
+    df[] <- lapply(df, as.numeric)
     return(df)
   } else {
     stop("Replacing every second separator did not work. Try to fix manually.")
@@ -287,6 +288,7 @@ read_quality_csv_with_sample_name_replacement <- function(filepath, sample_name_
   lines <- strsplit(lines, ",")
   df <- as.data.frame(do.call(rbind, lines[-1]))
   names(df) <- lines[[1]]
+  df[3:5]  <- lapply(df[3:5], as.numeric)
   return(df)
 }
 

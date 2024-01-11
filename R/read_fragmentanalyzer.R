@@ -36,6 +36,8 @@ read_fragmentanalyzer <- function(files,
   }
 
   ## read Electropherograms
+
+  sample_name_replace <- NULL # if there is separator in header strings, this will be assigned from read_electropherograms
   pherogram_files <- grep(Electropherogram_file_pattern, files, value = T, ignore.case = T)
   if (length(pherogram_files) > 0) {
     if (any(temp <- !file.exists(pherogram_files))) {
@@ -57,6 +59,7 @@ read_fragmentanalyzer <- function(files,
     message("No Electropherogram files found.")
   }
 
+
   ## read QualityTables
   quality_files <- grep(QualityTable_file_pattern, files, value = T, ignore.case = T)
   if (length(quality_files) > 0) {
@@ -69,7 +72,8 @@ read_fragmentanalyzer <- function(files,
 
     qualities <- tryCatch({
       read_qualities(subfiles = quality_files,
-                     filter_names = filter_names)
+                     filter_names = filter_names,
+                     sample_name_replace = sample_name_replace)
     }, error = function(e) {
       message("Error in reading Quality Table files.")
       return(NULL)
@@ -91,7 +95,8 @@ read_fragmentanalyzer <- function(files,
 
     peak_list <- tryCatch({
       read_peaks(subfiles = peak_files,
-                 filter_names = filter_names)
+                 filter_names = filter_names,
+                 sample_name_replace = sample_name_replace)
     }, error = function(e) {
       message("Error in reading Peak Table files.")
       return(NULL)
@@ -116,10 +121,19 @@ read_fragmentanalyzer <- function(files,
 
 }
 
-
 read_electropherograms <- function(subfiles,
-                                   filter_names = NULL) {
-  pherograms <- purrr::map(stats::setNames(subfiles, basename(subfiles)), read.csv, check.names = F)
+                                   filter_names = NULL,
+                                   sep = ",") {
+
+  if (any(purrr::map_lgl(subfiles, check_header_for_commas, sep = sep))) {
+    message("Greater number of separator '", sep, "' found in header than in row 1 of electropherogram csv file.")
+    message("Will try remove every second separator.")
+    read_file_fun <- read_csv_while_replacing_sep_in_header
+  } else {
+    read_file_fun <- read.csv
+  }
+
+  pherograms <- purrr::map(stats::setNames(subfiles, basename(subfiles)), read_file_fun, check.names = F)
   pherograms <- purrr::map_dfr(pherograms, function(x) {
     names(x) <- sapply(strsplit(names(x), ": "), "[", 2)
     names(x)[1] <- "size_nt"
@@ -135,8 +149,15 @@ read_electropherograms <- function(subfiles,
 }
 
 read_qualities <- function(subfiles,
-                           filter_names = NULL) {
-  qualities <- purrr::map_dfr(stats::setNames(subfiles, basename(subfiles)), read.csv, check.names = F, .id = "file")
+                           filter_names = NULL,
+                           sample_name_replace = NULL) {
+
+  if (!is.null(sample_name_replace)) {
+    qualities <- purrr::map_dfr(stats::setNames(subfiles, basename(subfiles)), read_quality_csv_with_sample_name_replacement, check.names = F, sample_name_replace = sample_name_replace, .id = "file")
+  } else {
+    qualities <- purrr::map_dfr(stats::setNames(subfiles, basename(subfiles)), read.csv, check.names = F, .id = "file")
+  }
+
   unit <- strsplit(grep("Conc", names(qualities), value = T), " ")[[1]][2]
   unit <- gsub("[\\(\\)]", "", unit)
   if (length(unit) == 0) {
@@ -152,9 +173,14 @@ read_qualities <- function(subfiles,
 }
 
 read_peaks <- function(subfiles,
-                       filter_names = NULL) {
+                       filter_names = NULL,
+                       sample_name_replace = NULL) {
 
-  peaks_list <- purrr::map(stats::setNames(subfiles, basename(subfiles)), read.csv, check.names = F, header = F)
+  if (!is.null(sample_name_replace)) {
+    peaks_list <- purrr::map(stats::setNames(subfiles, basename(subfiles)), read_peak_csv_with_sample_name_replacement, check.names = F, header = F, sample_name_replace = sample_name_replace)
+  } else {
+    peaks_list <- purrr::map(stats::setNames(subfiles, basename(subfiles)), read.csv, check.names = F, header = F)
+  }
 
   ## loop over files
   peaks_list2 <- purrr::map(peaks_list, function(x) {
@@ -209,4 +235,91 @@ read_peaks <- function(subfiles,
   summary_df <- summary_df[,c(names(summary_df)[which(names(summary_df) != "file")], "file")]
 
   return(list (peaks = peak_df, summary = summary_df))
+}
+
+str_count2 <- function(string, pattern = ",") {
+  nchar(string) - nchar(gsub(pattern, "", string))
+}
+
+check_header_for_commas <- function(filepath, sep = ",") {
+  lines <- vroom::vroom_lines(filepath, n_max = 2)
+  str_count2(lines[1], sep) != str_count2(lines[2], sep)
+}
+
+read_csv_while_replacing_sep_in_header <- function(filepath, sep = ",", check.names = F) {
+
+  lines <- vroom::vroom_lines(filepath)
+  # replace every second separator
+  sep_positions_in_header <- gregexpr(",", lines[1])[[1]]
+  sep_to_rm <- sep_positions_in_header[seq(2,length(sep_positions_in_header), 2)]
+  sep_for_split <- sep_positions_in_header[seq(1,length(sep_positions_in_header), 2)]
+  temp <- strsplit(lines[1], "")[[1]]
+  lines[1] <- paste(temp[-sep_to_rm], collapse = "")
+
+  # this is for read peaks below
+
+  sample_name_replace <- stats::setNames(gsub("^[[:alpha:]][[:digit:]]{1,2}: ", "", strsplit(lines[1], ",")[[1]]),
+                                         nm = gsub("^[[:alpha:]][[:digit:]]{1,2}: ", "", split_string_at_indices(input_string = paste(temp, collapse = ""), indices = sep_for_split)))
+  assign("sample_name_replace", sample_name_replace, envir = parent.frame(4)) # walk 4 environment upwards to set variable there, which is the read_fragmentanalyzer function environment
+
+  if (str_count2(lines[1], sep) == str_count2(lines[2], sep)) {
+    lines <- strsplit(lines, ",")
+    df <- as.data.frame(do.call(rbind, lines[-1]))
+    names(df) <- lines[[1]]
+    if (check.names) {
+      names(df) <- make.names(names(df))
+    }
+    return(df)
+  } else {
+    stop("Replacing every second separator did not work. Try to fix manually.")
+  }
+}
+
+read_quality_csv_with_sample_name_replacement <- function(filepath, sample_name_replace,
+                                                          check.names = F) {
+  lines <- vroom::vroom_lines(filepath)
+  for (i in seq_along(lines)) {
+    for (j in seq_along(sample_name_replace)) {
+      lines[i] <- gsub(names(sample_name_replace)[j], sample_name_replace[j], lines[i])
+    }
+  }
+
+  lines <- strsplit(lines, ",")
+  df <- as.data.frame(do.call(rbind, lines[-1]))
+  names(df) <- lines[[1]]
+  return(df)
+}
+
+read_peak_csv_with_sample_name_replacement <- function(filepath, sample_name_replace,
+                                                       check.names = F, header = F) {
+
+
+  lines <- vroom::vroom_lines(filepath)
+  for (i in seq_along(lines)) {
+    for (j in seq_along(sample_name_replace)) {
+      lines[i] <- gsub(names(sample_name_replace)[j], sample_name_replace[j], lines[i])
+    }
+  }
+
+  lines <- strsplit(lines, ",")
+  for (i in which(lengths(lines) < max(lengths(lines)))) {
+    lines[[i]] <- c(lines[[i]], "")
+  }
+  #unname(sapply(lines, str_count2))
+  #lines2[which(lengths(lines2) < max(lengths(lines2)))]
+
+  df <- as.data.frame(do.call(rbind, lines))
+  return(df)
+}
+
+split_string_at_indices <- function(input_string, indices) {
+  # this removes the character at indices positions
+  # this could be changed by an additional fun argument
+  return_string <- character(length = length(indices))
+  indices <- c(0, indices, nchar(input_string)+1) # if clause to check for 1 at start?
+  for (i in seq_along(indices[-1])) {
+    return_string[i] <- substr(input_string, indices[i]+1, indices[i+1]-1)
+  }
+
+  return(return_string)
 }

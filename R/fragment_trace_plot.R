@@ -54,7 +54,8 @@ fragment_trace_plot <- function(FA_data,
                        dplyr::mutate(RQN_R28S_18S = paste0(RQN, ", ", R28S_18S)) %>%
                        dplyr::mutate(RQN_conc = paste0(RQN, ", ", conc)) %>%
                        dplyr::mutate(R28S_18S_conc = paste0(R28S_18S, ", ", conc)) %>%
-                       dplyr::mutate(RQN_R28S_18S_conc = paste0(RQN, ", ", R28S_18S, ", ", conc)))
+                       dplyr::mutate(RQN_R28S_18S_conc = paste0(RQN, ", ", R28S_18S, ", ", conc)),
+                     by = dplyr::join_by(sample_ID))
 
   FA_plot <- ggplot2::ggplot(FA_data_plot, ggplot2::aes(x = size_nt, y = signal)) +
     ggplot2::geom_line(color = "tomato2") +

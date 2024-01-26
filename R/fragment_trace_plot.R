@@ -13,6 +13,8 @@
 #' @param theme_args arguments to modify the theme
 #' @param x_lims x-axis limits
 #' @param facetting how to facet the plot; see example
+#' @param line_args arguments to ggplot2::geom_line
+#' @param text_args arguments to ggrepel::geom_text_repel
 #'
 #' @return a ggplot2 plot object
 #' @export
@@ -21,7 +23,12 @@
 #' \dontrun{
 #' FA_files <- list.files(FA_folder, pattern = "\\.csv", full.names = T)
 #' FA_data <- plexr::read_fragmentanalyzer(FA_files)
+#' # color = "tomato2" is passed to geom_line
 #' fragment_trace_plot(FA_data, facetting = ggplot2::facet_wrap(vars(chemical, Buffer, DTT_mM, RQN), scales = "free_y"))
+#' # use the deprecated ggplot2::aes_q to define color by multiple columns
+#' fragment_trace_plot(FA_data, line_args = list(mapping = ggplot2::aes_q(color = ~paste(chemical, Buffer, DTT_mM, RQN))))
+#' # add RQN value as text annotation
+#' fragment_trace_plot(FA_data, facetting = ggplot2::facet_grid(cols = vars(chemical, Buffer), rows = vars(DTT_mM), scales = "free_y"), text_args = list(data = FA_data[["quality"]], mapping = ggplot2::aes(label = RQN), x = -Inf, y = Inf))
 #' }
 fragment_trace_plot <- function(FA_data,
                                 electropherogram_entry = "electropherogram",
@@ -32,7 +39,9 @@ fragment_trace_plot <- function(FA_data,
                                                   panel.grid.minor = ggplot2::element_blank(),
                                                   strip.background = ggplot2::element_rect(fill = "cornsilk")),
                                 facetting = NULL,
-                                x_lims = c(5,NA)) {
+                                x_lims = c(5,NA),
+                                text_args = list(),
+                                line_args = list(color = "tomato2")) {
 
   if (!is.list(FA_data)) {
     stop("FA_data has to be a list.")
@@ -57,9 +66,18 @@ fragment_trace_plot <- function(FA_data,
                        dplyr::mutate(RQN_R28S_18S_conc = paste0(RQN, ", ", R28S_18S, ", ", conc)),
                      by = dplyr::join_by(sample_ID))
 
+  #browser()
+  #FA_data_plot %>% dplyr::distinct()
+
   FA_plot <- ggplot2::ggplot(FA_data_plot, ggplot2::aes(x = size_nt, y = signal)) +
-    ggplot2::geom_line(color = "tomato2") +
+    do.call(ggplot2::geom_line, args = line_args) +
     ggplot2::scale_x_log10(breaks = x_breaks, limits = x_lims)
+
+  if (length(text_args) > 0) {
+    FA_plot <-
+      FA_plot +
+      do.call(ggrepel::geom_text_repel, args = text_args)
+  }
 
   FA_plot <- FA_plot + theme
   FA_plot <- FA_plot + do.call(ggplot2::theme, args = theme_args)

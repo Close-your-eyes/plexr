@@ -38,8 +38,8 @@ fragment_trace_plot <- function(FA_data,
     stop("FA_data has to be a list.")
   }
 
-  if (!electropherogramm_entry %in% names(FA_data)) {
-    stop(electropherogramm_entry, " not found in FA_data.")
+  if (!electropherogram_entry %in% names(FA_data)) {
+    stop(electropherogram_entry, " not found in FA_data.")
   }
 
   if (!quality_entry %in% names(FA_data)) {
@@ -47,7 +47,7 @@ fragment_trace_plot <- function(FA_data,
   }
 
   FA_data_plot <-
-    FA_data[[electropherogramm_entry]] %>%
+    FA_data[[electropherogram_entry]] %>%
     dplyr::left_join(FA_data[[quality_entry]] %>%
                        dplyr::mutate(RQN = paste0("RQN = ", RQN), conc = paste0(conc, " ", unit), R28S_18S = paste0("28S/18S = ", R28S_18S)) %>%
                        dplyr::select(RQN, sample_ID, conc, R28S_18S) %>%

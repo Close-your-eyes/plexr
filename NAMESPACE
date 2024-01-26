@@ -2,6 +2,7 @@
 
 export(alt_5pl_model)
 export(five_par_log_regress)
+export(fragment_trace_plot)
 export(read_bioplex)
 export(read_fragmentanalyzer)
 export(read_magpix)

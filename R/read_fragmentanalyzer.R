@@ -173,6 +173,9 @@ read_qualities <- function(subfiles,
   }
   qualities$unit <- unit
   qualities <- qualities[,c("well", "sample_ID", "conc", "unit", "RQN", "R28S_18S", "file")]
+  qualities$RQN2 <- paste0("RQN = ", RQN)
+  qualities$conc2 <- paste0(conc, " ", unit)
+  qualities$R28S_18S2 <- paste0("28S/18S = ", R28S_18S)
   return(qualities)
 }
 

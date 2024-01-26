@@ -40,7 +40,13 @@ fragment_trace_plot <- function(FA_data,
                                                   strip.background = ggplot2::element_rect(fill = "cornsilk")),
                                 facetting = NULL,
                                 x_lims = c(5,NA),
-                                text_args = list(),
+                                text_fun = ggrepel::geom_label_repel,
+                                text_args = list(data = FA_data[[quality_entry]],
+                                                 mapping = ggplot2::aes(label = RQN),
+                                                 x = -Inf,
+                                                 y = Inf,
+                                                 size = 5,
+                                                 min.segment.length = Inf),
                                 line_args = list(color = "tomato2")) {
 
   if (!is.list(FA_data)) {
@@ -66,9 +72,6 @@ fragment_trace_plot <- function(FA_data,
                        dplyr::mutate(RQN_R28S_18S_conc = paste0(RQN, ", ", R28S_18S, ", ", conc)),
                      by = dplyr::join_by(sample_ID))
 
-  #browser()
-  #FA_data_plot %>% dplyr::distinct()
-
   FA_plot <- ggplot2::ggplot(FA_data_plot, ggplot2::aes(x = size_nt, y = signal)) +
     do.call(ggplot2::geom_line, args = line_args) +
     ggplot2::scale_x_log10(breaks = x_breaks, limits = x_lims)
@@ -76,7 +79,7 @@ fragment_trace_plot <- function(FA_data,
   if (length(text_args) > 0) {
     FA_plot <-
       FA_plot +
-      do.call(ggrepel::geom_text_repel, args = text_args)
+      do.call(text_fun, args = text_args)
   }
 
   FA_plot <- FA_plot + theme

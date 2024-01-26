@@ -1,5 +1,9 @@
 #' Read csv output files from Fragment Analyzer into data frames
 #'
+#' It may be advisable to provide a set of files from one measurement only at a time.
+#' So, if there is more than one folder with csv files from the machine, loop
+#' over these folders and provide the respective contained files (their paths) to this function.
+#'
 #' @param files full path to all files
 #' @param Electropherogram_file_pattern pattern to identify electropherogram files within files
 #' @param QualityTable_file_pattern pattern to identify Quality Table files within files

@@ -28,9 +28,9 @@ fragment_trace_plot <- function(FA_data,
                                 quality_entry = "quality",
                                 x_breaks = c(15,500,1500,3000,6000),
                                 theme = ggplot2::theme_bw(),
-                                theme_args = list(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-                                                  panel.grid.minor = element_blank(),
-                                                  strip.background = element_rect(fill = "cornsilk")),
+                                theme_args = list(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1),
+                                                  panel.grid.minor = ggplot2::element_blank(),
+                                                  strip.background = ggplot2::element_rect(fill = "cornsilk")),
                                 facetting = NULL,
                                 x_lims = c(5,NA)) {
 
@@ -56,9 +56,9 @@ fragment_trace_plot <- function(FA_data,
                        dplyr::mutate(R28S_18S_conc = paste0(R28S_18S, ", ", conc)) %>%
                        dplyr::mutate(RQN_R28S_18S_conc = paste0(RQN, ", ", R28S_18S, ", ", conc)))
 
-  FA_plot <- ggplot(FA_data_plot, aes(x = size_nt, y = signal)) +
-    geom_line(color = "tomato2") +
-    scale_x_log10(breaks = x_breaks, limits = x_lims)
+  FA_plot <- ggplot2::ggplot(FA_data_plot, ggplot2::aes(x = size_nt, y = signal)) +
+    ggplot2::geom_line(color = "tomato2") +
+    ggplot2::scale_x_log10(breaks = x_breaks, limits = x_lims)
 
   FA_plot <- FA_plot + theme
   FA_plot <- FA_plot + do.call(ggplot2::theme, args = theme_args)

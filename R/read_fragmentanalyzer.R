@@ -171,11 +171,12 @@ read_qualities <- function(subfiles,
   if (!is.null(filter_names) && length(filter_names) > 1) {
     qualities <- qualities[!apply(sapply(filter_names, grepl, x = qualities[,"sample_ID",drop=T], simplify = T), 1, any),]
   }
+
   qualities$unit <- unit
   qualities <- qualities[,c("well", "sample_ID", "conc", "unit", "RQN", "R28S_18S", "file")]
-  qualities$RQN2 <- paste0("RQN = ", RQN)
-  qualities$conc2 <- paste0(conc, " ", unit)
-  qualities$R28S_18S2 <- paste0("28S/18S = ", R28S_18S)
+  qualities$RQN2 <- paste0("RQN = ", qualities$RQN)
+  qualities$conc2 <- paste0(qualities$conc, " ", qualities$unit)
+  qualities$R28S_18S2 <- paste0("28S/18S = ", qualities$R28S_18S)
   return(qualities)
 }
 

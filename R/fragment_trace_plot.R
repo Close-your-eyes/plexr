@@ -19,6 +19,7 @@
 #' @param text_fun which function to use for plotting text annotation;
 #' pass a list of functions for every list element in text_args or one function
 #' for every element in text_args
+#' @param sample_ID_col_name column name of sample_IDs, used for joining data tables from FA
 #'
 #' @return a ggplot2 plot object
 #' @export
@@ -37,6 +38,7 @@
 fragment_trace_plot <- function(FA_data,
                                 electropherogram_entry = "electropherogram",
                                 quality_entry = "quality",
+                                sample_ID_col_name = "sample_ID_FA",
                                 x_breaks = c(15,500,1500,3000,6000),
                                 theme = ggplot2::theme_bw(),
                                 theme_args = list(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1),
@@ -94,12 +96,12 @@ fragment_trace_plot <- function(FA_data,
     FA_data[[electropherogram_entry]] %>%
     dplyr::left_join(FA_data[[quality_entry]] %>%
                        dplyr::mutate(RQN = paste0("RQN = ", RQN), conc = paste0(conc, " ", unit), R28S_18S = paste0("28S/18S = ", R28S_18S)) %>%
-                       dplyr::select(RQN, sample_ID, conc, R28S_18S) %>%
+                       dplyr::select(RQN, !!rlang::sym(sample_ID_col_name), conc, R28S_18S) %>%
                        dplyr::mutate(RQN_R28S_18S = paste0(RQN, ", ", R28S_18S)) %>%
                        dplyr::mutate(RQN_conc = paste0(RQN, ", ", conc)) %>%
                        dplyr::mutate(R28S_18S_conc = paste0(R28S_18S, ", ", conc)) %>%
                        dplyr::mutate(RQN_R28S_18S_conc = paste0(RQN, ", ", R28S_18S, ", ", conc)),
-                     by = dplyr::join_by(sample_ID))
+                     by = dplyr::join_by(!!rlang::sym(sample_ID_col_name)))
 
   FA_plot <- ggplot2::ggplot(FA_data_plot, ggplot2::aes(x = size_nt, y = signal)) +
     do.call(ggplot2::geom_line, args = line_args) +

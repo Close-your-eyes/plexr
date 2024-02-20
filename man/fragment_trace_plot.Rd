@@ -8,13 +8,20 @@ fragment_trace_plot(
   FA_data,
   electropherogram_entry = "electropherogram",
   quality_entry = "quality",
+  sample_ID_col_name = "sample_ID_FA",
   x_breaks = c(15, 500, 1500, 3000, 6000),
   theme = ggplot2::theme_bw(),
-  theme_args = list(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-    panel.grid.minor = element_blank(), strip.background = element_rect(fill =
-    "cornsilk")),
+  theme_args = list(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust =
+    1), panel.grid.minor = ggplot2::element_blank(), strip.background =
+    ggplot2::element_rect(fill = "cornsilk")),
   facetting = NULL,
-  x_lims = c(5, NA)
+  x_lims = c(5, NA),
+  text_fun = list(ggrepel::geom_label_repel, ggrepel::geom_text_repel),
+  text_args = list(list(data = FA_data[[quality_entry]], mapping = ggplot2::aes(label =
+    format(RQN, nsmall = 1)), x = -Inf, y = Inf, size = 4, min.segment.length = Inf),
+    list(data = FA_data[[quality_entry]], mapping = ggplot2::aes(label = chemical_code),
+    x = -Inf, y = -Inf, size = 3, min.segment.length = Inf)),
+  line_args = list(color = "tomato2")
 )
 }
 \arguments{
@@ -23,6 +30,8 @@ fragment_trace_plot(
 \item{electropherogram_entry}{name of the electropherogram list entry}
 
 \item{quality_entry}{name of the quality list entry}
+
+\item{sample_ID_col_name}{column name of sample_IDs, used for joining data tables from FA}
 
 \item{x_breaks}{breaks on x-axis}
 
@@ -33,6 +42,15 @@ fragment_trace_plot(
 \item{facetting}{how to facet the plot; see example}
 
 \item{x_lims}{x-axis limits}
+
+\item{text_fun}{which function to use for plotting text annotation;
+pass a list of functions for every list element in text_args or one function
+for every element in text_args}
+
+\item{text_args}{arguments to ggrepel::geom_text_repel; pass empty list to omit
+plotting text annotation; pass a list of lists to plot multiple annotations}
+
+\item{line_args}{arguments to ggplot2::geom_line}
 }
 \value{
 a ggplot2 plot object
@@ -47,6 +65,11 @@ RQN_conc, R28S_18S_conc, RQN_R28S_18S_conc.
 \dontrun{
 FA_files <- list.files(FA_folder, pattern = "\\\\.csv", full.names = T)
 FA_data <- plexr::read_fragmentanalyzer(FA_files)
-fragment_trace_plot(FA_data, facetting = ggplot2::facet_wrap(vars(chemical, Buffer, DTT_mM, RQN), scales = "free_y"))
+# color = "tomato2" is passed to geom_line
+fragment_trace_plot(FA_data, facetting = ggplot2::facet_wrap(vars(chemical, Buffer, DTT_mM), scales = "free_y"))
+# use the deprecated ggplot2::aes_q to define color by multiple columns
+fragment_trace_plot(FA_data, line_args = list(mapping = ggplot2::aes_q(color = ~paste(chemical, Buffer, DTT_mM))))
+# add RQN value as text annotation
+fragment_trace_plot(FA_data, facetting = ggplot2::facet_grid(cols = vars(chemical, Buffer), rows = vars(DTT_mM), scales = "free_y"), text_args = list(data = FA_data[["quality"]], mapping = ggplot2::aes(label = RQN), x = -Inf, y = Inf))
 }
 }

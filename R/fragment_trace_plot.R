@@ -29,9 +29,9 @@
 #' FA_files <- list.files(FA_folder, pattern = "\\.csv", full.names = T)
 #' FA_data <- plexr::read_fragmentanalyzer(FA_files)
 #' # color = "tomato2" is passed to geom_line
-#' fragment_trace_plot(FA_data, facetting = ggplot2::facet_wrap(vars(chemical, Buffer, DTT_mM, RQN), scales = "free_y"))
+#' fragment_trace_plot(FA_data, facetting = ggplot2::facet_wrap(vars(chemical, Buffer, DTT_mM), scales = "free_y"))
 #' # use the deprecated ggplot2::aes_q to define color by multiple columns
-#' fragment_trace_plot(FA_data, line_args = list(mapping = ggplot2::aes_q(color = ~paste(chemical, Buffer, DTT_mM, RQN))))
+#' fragment_trace_plot(FA_data, line_args = list(mapping = ggplot2::aes_q(color = ~paste(chemical, Buffer, DTT_mM))))
 #' # add RQN value as text annotation
 #' fragment_trace_plot(FA_data, facetting = ggplot2::facet_grid(cols = vars(chemical, Buffer), rows = vars(DTT_mM), scales = "free_y"), text_args = list(data = FA_data[["quality"]], mapping = ggplot2::aes(label = RQN), x = -Inf, y = Inf))
 #' }
@@ -64,8 +64,6 @@ fragment_trace_plot <- function(FA_data,
   if (!is.list(FA_data)) {
     stop("FA_data has to be a list.")
   }
-
-
   if (is.list(text_args) && any(!sapply(text_args, is.list))) {
     # this tests if the list is a list of lists
     # wraps a list around text_args if text_args is an immediate list of text arguments
@@ -90,6 +88,13 @@ fragment_trace_plot <- function(FA_data,
 
   if (!quality_entry %in% names(FA_data)) {
     stop(quality_entry, " not found in FA_data.")
+  }
+
+  if (any(grepl("RQN", names(facetting[["params"]][["facets"]])))) {
+    message("Did you put RQN or RQN2 into facetting vars? You may want to avoid that.")
+  }
+  if (any(grepl("chemical_code", names(facetting[["params"]][["facets"]])))) {
+    message("Did you put chemical_code into facetting vars? You may want to avoid that.")
   }
 
   FA_data_plot <-

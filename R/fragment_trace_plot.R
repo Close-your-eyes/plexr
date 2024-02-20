@@ -15,7 +15,8 @@
 #' @param facetting how to facet the plot; see example
 #' @param line_args arguments to ggplot2::geom_line
 #' @param text_args arguments to ggrepel::geom_text_repel; pass empty list to omit
-#' plotting text annotation; pass a list of lists to plot multiple annotations
+#' plotting text annotation; pass a list of lists to plot multiple annotations;
+#' within ggplot2::aes it is selected which variable is being plotted
 #' @param text_fun which function to use for plotting text annotation;
 #' pass a list of functions for every list element in text_args or one function
 #' for every element in text_args

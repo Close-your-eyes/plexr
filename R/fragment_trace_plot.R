@@ -90,6 +90,11 @@ fragment_trace_plot <- function(FA_data,
     stop(quality_entry, " not found in FA_data.")
   }
 
+  if (!sample_ID_col_name %in% names(FA_data[[electropherogram_entry]]) && !sample_ID_col_name %in% names(FA_data[[quality_entry]])) {
+    stop(sample_ID_col_name, " not found in " electropherogram_entry, " and ", quality_entry, " slots of FA_data".)
+  }
+
+
   if (any(grepl("RQN", names(facetting[["params"]][["facets"]])))) {
     message("Did you put RQN or RQN2 into facetting vars? You may want to avoid that.")
   }

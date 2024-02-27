@@ -18,7 +18,8 @@ read_nanodrop <- function(reports, spectra) {
   # to do: DNA and protein report from Nanodrop
 
   repo <- do.call(rbind,lapply(reports, function(x) {
-    re <- utils::read.csv(x, sep = "\t", header = T, row.names = 1, check.names = F)
+    re <- utils::read.csv(x, sep = "\t", header = T, row.names = 1, check.names = F, colClasses = c("Sample ID" = "character",
+                                                                                                    "User name" = "character"))
     re$Unit <- stringr::str_replace(re$Unit, "\xb5", "u")
     #re$Unit <- gsub("\\\\", "", re$Unit)
     #re$Unit <- gsub("xb5", "u", re$Unit)

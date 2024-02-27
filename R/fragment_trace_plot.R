@@ -92,7 +92,7 @@ fragment_trace_plot <- function(FA_data,
   }
 
   if (!sample_ID_col_name %in% names(FA_data[[electropherogram_entry]]) && !sample_ID_col_name %in% names(FA_data[[quality_entry]])) {
-    stop(sample_ID_col_name, " not found in " electropherogram_entry, " and ", quality_entry, " slots of FA_data".)
+    stop(sample_ID_col_name, " not found in ", electropherogram_entry, " and ", quality_entry, " slots of FA_data.")
   }
 
 

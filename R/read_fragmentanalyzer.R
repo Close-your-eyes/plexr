@@ -24,7 +24,7 @@ read_fragmentanalyzer <- function(files,
                                   Electropherogram_file_pattern = "Electropherogram",
                                   QualityTable_file_pattern = "Quality Table",
                                   PeakTable_file_pattern = "Peak Table",
-                                  filter_names = c("Ladder", "Samp.[[:digit:]]{1,2}"),
+                                  filter_names = c("Ladder", "Samp.[[:digit:]]{1,2}", "blank"),
                                   return = c("data.frame", "list")) {
 
   return <- match.arg(return, c("data.frame", "list"))
@@ -40,6 +40,7 @@ read_fragmentanalyzer <- function(files,
   }
 
   ## read Electropherograms
+
 
   sample_name_replace <- NULL # if there is separator in header strings, this will be assigned from read_electropherograms
   pherogram_files <- grep(Electropherogram_file_pattern, files, value = T, ignore.case = T)
@@ -142,7 +143,7 @@ read_electropherograms <- function(subfiles,
     names(x) <- sapply(strsplit(names(x), ": "), "[", 2)
     names(x)[1] <- "size_nt"
     if (!is.null(filter_names) && length(filter_names) > 1) {
-      x <- x[,!apply(sapply(filter_names, grepl, x = names(x), simplify = T), 1, any)]
+      x <- x[,!apply(sapply(filter_names, grepl, x = names(x), simplify = T, ignore.case = T), 1, any)]
     }
     x <- tidyr::pivot_longer(x, cols = -size_nt, names_to = "sample_ID", values_to = "signal")
     return(x)
@@ -169,7 +170,7 @@ read_qualities <- function(subfiles,
   }
   names(qualities) <- c("file", "well", "sample_ID", "conc", "RQN", "R28S_18S")
   if (!is.null(filter_names) && length(filter_names) > 1) {
-    qualities <- qualities[!apply(sapply(filter_names, grepl, x = qualities[,"sample_ID",drop=T], simplify = T), 1, any),]
+    qualities <- qualities[!apply(sapply(filter_names, grepl, x = qualities[,"sample_ID",drop=T], simplify = T, ignore.case = T), 1, any),]
   }
 
   qualities$unit <- unit
@@ -207,7 +208,7 @@ read_peaks <- function(subfiles,
       if (length(split_rows2) == 0) {
         # empty tables sometimes for empty lanes
         return(list(peak_table = NULL, summary_table = NULL))
-      } else {
+      } else if (length(split_rows2) == 1) {
         names(y) <- gsub("/", "_", names(y))
         names(y)[1:3] <- c("peak_ID", "size_nt", "conc_pct")
         z1 <- y[1:split_rows2,]
@@ -225,10 +226,13 @@ read_peaks <- function(subfiles,
         z2$amount <- as.numeric(z2$amount)
         z2$unit <- gsub("/", "_", z2$unit)
         return(list(peak_table = z1, summary_table = z2))
+      } else {
+        message("Peak file reading: More than one split_rows2 found. Skipping.")
+        return(list(peak_table = NULL, summary_table = NULL))
       }
     })
     if (!is.null(filter_names) && length(filter_names) > 1) {
-      sample_tables <- sample_tables[!apply(sapply(filter_names, grepl, x = names(sample_tables), simplify = T), 1, any)]
+      sample_tables <- sample_tables[!apply(sapply(filter_names, grepl, x = names(sample_tables), simplify = T, ignore.case = T), 1, any)]
     }
     peak_sample_tables <- dplyr::bind_rows(stats::setNames(sapply(sample_tables, "[", 1), names(sample_tables)), .id = "sample_ID")
     summary_sample_tables <- dplyr::bind_rows(stats::setNames(sapply(sample_tables, "[", 2), names(sample_tables)), .id = "sample_ID")

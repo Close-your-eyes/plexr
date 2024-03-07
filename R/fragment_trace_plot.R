@@ -50,17 +50,20 @@ fragment_trace_plot <- function(FA_data,
                                 text_fun = list(ggrepel::geom_label_repel, ggrepel::geom_text_repel),
                                 text_args = list(list(data = FA_data[[quality_entry]],
                                                       mapping = ggplot2::aes(label = format(RQN, nsmall = 1)),
-                                                      x = -Inf,
-                                                      y = Inf,
+                                                      x = -Inf, y = Inf,
                                                       size = 4,
                                                       min.segment.length = Inf),
                                                  list(data = FA_data[[quality_entry]],
                                                       mapping = ggplot2::aes(label = chemical_code),
-                                                      x = -Inf,
-                                                      y = -Inf,
+                                                      x = -Inf, y = -Inf,
                                                       size = 3,
                                                       min.segment.length = Inf)),
                                 line_args = list(color = "tomato2")) {
+
+  # setting x or y to Inf or -Inf fails to work in ggrepel 0.9.5; but works in ggrepel 0.9.4
+  # https://github.com/slowkow/ggrepel/issues/252
+  # but works again with the latest, fixed version, which enabled x or y to be INF
+  # devtools::install_github("slowkow/ggrepel")
 
   if (!is.list(FA_data)) {
     stop("FA_data has to be a list.")
@@ -102,6 +105,7 @@ fragment_trace_plot <- function(FA_data,
   if (any(grepl("chemical_code", names(facetting[["params"]][["facets"]])))) {
     message("Did you put chemical_code into facetting vars? You may want to avoid that.")
   }
+
 
   FA_data_plot <-
     FA_data[[electropherogram_entry]] %>%

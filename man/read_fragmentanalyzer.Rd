@@ -9,7 +9,7 @@ read_fragmentanalyzer(
   Electropherogram_file_pattern = "Electropherogram",
   QualityTable_file_pattern = "Quality Table",
   PeakTable_file_pattern = "Peak Table",
-  filter_names = c("Ladder", "Samp.[[:digit:]]{1,2}"),
+  filter_names = c("Ladder", "Samp.[[:digit:]]{1,2}", "blank"),
   return = c("data.frame", "list")
 )
 }

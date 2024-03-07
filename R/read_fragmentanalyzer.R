@@ -196,7 +196,7 @@ read_peaks <- function(subfiles,
     #splits <- which(diff(trimws(x[,1,drop=T]) == "") == -1)
     splits <- which(trimws(x[,2,drop=T]) == "Total Conc.:") + 1
     splits <- splits[-length(splits)]
-    split_rows <- brathering::seq2(c(1,splits+1), c(splits, nrow(x)))
+    split_rows <- seq2(c(1,splits+1), c(splits, nrow(x)))
     sampleIDs <- x[c(1,splits+1),2]
     x_split <- split(x, rep(sampleIDs, lengths(split_rows)))
 
@@ -336,4 +336,15 @@ split_string_at_indices <- function(input_string, indices) {
   }
 
   return(return_string)
+}
+
+
+seq2_default <- Vectorize(seq.default, vectorize.args = c("from", "to"))
+seq2 <- function(from = 1, to = 1) {
+  x <- seq2_default(from = from, to = to)
+  # make sure always a list is returned
+  if (is.matrix(x)) {
+    x <- unname(as.list(as.data.frame(x)))
+  }
+  return(x)
 }

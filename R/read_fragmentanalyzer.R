@@ -191,6 +191,7 @@ read_peaks <- function(subfiles,
     peaks_list <- purrr::map(stats::setNames(subfiles, basename(subfiles)), read.csv, check.names = F, header = F)
   }
 
+
   ## loop over files
   peaks_list2 <- purrr::map(peaks_list, function(x) {
     #splits <- which(diff(trimws(x[,1,drop=T]) == "") == -1)
@@ -202,8 +203,9 @@ read_peaks <- function(subfiles,
 
     ## loop over samples
     sample_tables <- purrr::map(x_split, function(y) {
-      names(y) <- unname(unlist(y[2,,drop=T]))
-      y <- y[-c(1:2),]
+      ref_row <- which(y[,2] == "15 (LM)")-1
+      names(y) <- unname(unlist(y[ref_row,,drop=T]))
+      y <- y[-c(1:ref_row),]
       split_rows2 <- which(diff(trimws(y[,1]) == "") == 1)
       if (length(split_rows2) == 0) {
         # empty tables sometimes for empty lanes
@@ -213,11 +215,12 @@ read_peaks <- function(subfiles,
         names(y)[1:3] <- c("peak_ID", "size_nt", "conc_pct")
         z1 <- y[1:split_rows2,]
         rownames(z1) <- seq(1, nrow(z1))
-        z1$size_nt <- factor(z1$size_nt, levels = z1$size_nt)
+        if (anyDuplicated(z1$size_nt) == 0) {
+          z1$size_nt <- factor(z1$size_nt, levels = z1$size_nt)
+        }
         for (i in 3:6) {
           z1[,i] <- as.numeric(z1[,i,drop=T])
         }
-
         z2 <- y[(split_rows2+3):(nrow(y)-1),]
         z2 <- z2[,2:4]
         names(z2) <- c("parameter", "amount", "unit")
